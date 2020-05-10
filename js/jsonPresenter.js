@@ -50,20 +50,24 @@ window.onload = () => {
 
 const JSON_Presenter = {
 
-    styles: [
-        `border`,
-        `background`
-    ],
-
     present: (container, text) => {
+        containerStyles = [
+            `border`,
+            `background`,
+            `font-face`,
+            `font-size`
+        ];
+
         JSON_Presenter.container = container;
-
         const script = JSON.parse(text);
-
-        JSON_Presenter.doGlobal(script);
-
-        let step = 0;
-        JSON_Presenter.doStep(script, step);
+        const height = Math.round(parseFloat(container.offsetWidth) * script.aspectH / script.aspectW);
+        container.style[`height`] = `${Math.round(height)}px`;
+        for (const item of containerStyles) {
+            JSON_Presenter.doStyle(container, script.default, item);
+        } 
+        container.style[`background-size`] = `cover`;
+        JSON_Presenter.doBlocks(script.blocks);
+        JSON_Presenter.doStep(script, 0);
     },
 
     doStyle: (element, spec, property) => {
@@ -72,18 +76,14 @@ const JSON_Presenter = {
         }
     },
 
-    doGlobal: script => {
+    doBlocks: blocks => {
         const container = JSON_Presenter.container;
-        const height = Math.round(parseFloat(container.offsetWidth) * script.aspectH / script.aspectW);
-        container.style[`height`] = `${Math.round(height)}px`;
-        for (const item of JSON_Presenter.styles) {
-            JSON_Presenter.doStyle(container, script.default, item);
-        } 
-        container.style[`background-size`] = `cover`;
+        for (const block of blocks) {
+
+        }
     },
 
     doStep: (script, stepno) => {
-        console.log(script);
         const step = script.steps[stepno];
         console.log(step);
     }

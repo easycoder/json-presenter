@@ -58,12 +58,9 @@ const JSON_Presenter = {
     present: (container, text) => {
         JSON_Presenter.container = container;
 
-        const script = JSON.parse(text);
+        JSON_Presenter.doGlobal(JSON.parse(text));
 
-        JSON_Presenter.doGlobal(script);
-
-        let step = 0;
-        JSON_Presenter.doStep(script, step);
+        JSON_Presenter.doStep(script, 0);
     },
 
     doStyle: (element, spec, property) => {
@@ -83,7 +80,7 @@ const JSON_Presenter = {
     },
 
     doStep: (script, stepno) => {
-        console.log(script);
+        const container = JSON_Presenter.container;
         const step = script.steps[stepno];
         console.log(step);
     }
