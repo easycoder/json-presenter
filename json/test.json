@@ -67,8 +67,26 @@
     },
     "steps": [
         {
-            "block": "title 1",
-            "content": "presenter title"
+            "action": "show",
+            "items": [
+                {
+                    "block": "title 1",
+                    "content": "presenter title"
+                }
+            ]
+        },
+        {
+            "action": "hold",
+            "duration": 10
+        },
+        {
+            "action": "hide",
+            "items": [
+                {
+                    "block": "title 1",
+                    "content": "presenter title"
+                }
+            ]
         }
     ]
 }

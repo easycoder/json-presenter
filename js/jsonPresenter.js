@@ -108,6 +108,7 @@ const JSON_Presenter = {
             const element = document.createElement(`div`);
             block.element = element;
             element.style[`position`] = `absolute`;
+            element.style[`display`] = `none`;
             element.style[`left`] = properties.blockLeft * w / 1000;
             element.style[`top`] = properties.blockTop * h / 1000;
             element.style[`width`] = `${properties.blockWidth * w / 1000}px`;
@@ -136,15 +137,41 @@ const JSON_Presenter = {
     },
 
     doStep: (script, stepno) => {
+        const goto = (script, stepno) => {
+            JSON_Presenter.doStep(script, stepno);
+        };
         const step = script.steps[stepno];
-        console.log(step);
-        const block = script.blocks[step.block];
-        switch (block.type) {
-            case `text`:
-                const text = script.content[step.content];
-                block.element.inner.text.innerHTML = text;
+        switch (step.action) {
+            case `show`:
+                for (const item of step.items) {
+                    const block = script.blocks[item.block];
+                    switch (block.type) {
+                        case `text`:
+                            let content = script.content[item.content];
+                            if (content[0] === `[`) {
+                                content = JSON.parse(content).join(`<br><br>`);
+                            }
+                            block.element.inner.text.innerHTML = content.split(`\n`).join(`<br>`);
+                        break;
+                        case `image`:
+                            break;
+                    }
+                    block.element.style[`display`] = `block`;
+                }
+                goto(script, stepno + 1);
                 break;
-            case `image`:
+            case `hide`:
+                for (const item of step.items) {
+                    const block = script.blocks[item.block];
+                     block.element.style[`display`] = `none`;
+                }
+                goto(script, stepno + 1);
+                break;
+            case `hold`:
+                const duration = step.duration * 1000;
+                setTimeout(function () {
+                    goto(script, stepno + 1);
+                }, duration);
                 break;
         }
     }
