@@ -1,0 +1,58 @@
+{
+    "name": "JSON:Presenter",
+    "description": "A demo presentation that outlines the features of JSON:Presenter",
+    "aspectW": 16,
+    "aspectH": 9,
+    "default": {
+        "border": "1px solid black",
+        "background": "black",
+        "fontFace": "Times New Roman,serif",
+        "fontSize": 50,
+        "panelPadding": "1em"
+    },
+    "blocks": {
+        "title 1": {
+            "type": "text",
+            "blockTop": 400,
+            "blockWidth": 1000,
+            "blockHeight": 200,
+            "textAlign": "center",
+            "fontFace": "Helvetica,sans-serif",
+            "fontSize": 200,
+            "fontWeight": "bold"
+        },
+        "title 2": {
+            "type": "text",
+            "blockWidth": 1000,
+            "blockHeight": 150,
+            "textAlign": "center",
+            "fontFace": "Helvetica,sans-serif",
+            "fontSize": 100,
+            "fontWeight": "bold"
+        },
+        "body": {
+            "type": "text",
+            "blockTop": 200,
+            "blockWidth": 1000,
+            "blockHeight": 800
+        }
+    },
+    "content":  {
+        "presenter title": "JSON:Presenter",
+        "slide 1": [
+            "JSON:Presenter&copy; lets you create PowerPoint-like presentations that can be run anywhere equipped with a suitable presentation engine; most notably in a web browser.",
+            
+            "Web-based presentations can run from any host, including static; all you need is one CDN-hosted JavaScript file and you're good to go.",
+            
+            "Rather than being created in a GUI, presentations are JSON text files having a format that can be implemented by any suitable engine.",
+            
+            "The first engine available is a component of the EasyCoder&trade; browser scripting language but it can be used completely independently of the latter."
+        ]
+    },
+    "steps": [
+        {
+            "block": "title 1",
+            "content": "presenter title"
+        }
+    ]
+}
