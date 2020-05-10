@@ -3,9 +3,11 @@
     "description": "A demo presentation that outlines the features of JSON:Presenter",
     "aspectW": 16,
     "aspectH": 9,
-    "default": {
+    "container": {
         "border": "1px solid black",
-        "background": "black",
+        "background": "black"
+    },
+    "default": {
         "fontFace": "Times New Roman,serif",
         "fontSize": 50,
         "panelPadding": "1em"
