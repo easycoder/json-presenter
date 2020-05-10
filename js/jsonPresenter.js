@@ -51,40 +51,101 @@ window.onload = () => {
 const JSON_Presenter = {
 
     present: (container, text) => {
-        containerStyles = [
+        const containerStyles = [
             `border`,
-            `background`,
-            `font-face`,
-            `font-size`
+            `background`
+        ];
+        const defaults = [
+            `fontFace`,
+            `fontWeight`,
+            `fontStyle`,
+            `textAlign`,
+            `fontColor`,
+            `blockLeft`,
+            `blockTop`,
+            `blockWidth`,
+            `blockHeight`,
+            `blockBackground`,
+            `blockPadding`
         ];
 
-        JSON_Presenter.container = container;
         const script = JSON.parse(text);
         const height = Math.round(parseFloat(container.offsetWidth) * script.aspectH / script.aspectW);
         container.style[`height`] = `${Math.round(height)}px`;
+        container.style[`position`] = `relative`;
         for (const item of containerStyles) {
-            JSON_Presenter.doStyle(container, script.default, item);
+            JSON_Presenter.doStyle(container, script.container, item);
         } 
         container.style[`background-size`] = `cover`;
-        JSON_Presenter.doBlocks(script.blocks);
+        JSON_Presenter.doBlocks(container, script.blocks, script.defaults);
         JSON_Presenter.doStep(script, 0);
     },
 
+    // Process a style property
     doStyle: (element, spec, property) => {
         if (typeof spec[property] !== 'undefined') {
             element.style[property] = spec[property];
         }
     },
 
-    doBlocks: blocks => {
-        const container = JSON_Presenter.container;
-        for (const block of blocks) {
-
+    // Create all the blocks
+    doBlocks: (container, blocks, defaults) => {
+        for (const name in blocks) {
+            const block = blocks[name];
+            const properties = {};
+            // Set up the default properties
+            for (const name in defaults) {
+                properties[name] = defaults[name];
+            }
+            // Override with local values
+            for (const name in block.spec) {
+                properties[name] = block.spec[name];
+            }
+            block.properties = properties;
+            // Create the block
+            w = Math.round(container.getBoundingClientRect().width);
+            h = Math.round(container.getBoundingClientRect().height);
+            const element = document.createElement(`div`);
+            block.element = element;
+            element.style[`position`] = `absolute`;
+            element.style[`left`] = properties.blockLeft * w / 1000;
+            element.style[`top`] = properties.blockTop * h / 1000;
+            element.style[`width`] = `${properties.blockWidth * w / 1000}px`;
+            element.style[`height`] = `${properties.blockHeight * h / 1000}px`;
+            element.style[`background`] = properties.blockBackground;
+            element.style[`border`] = properties.blockBorder;
+            container.appendChild(element);
+            const padding = properties.blockPadding;
+            const inner = document.createElement(`div`);
+            inner.style[`position`] = `absolute`;
+            inner.style[`left`] = padding;
+            inner.style[`top`] = padding;
+            inner.style[`width`] = `calc(100% - ${padding} - ${padding})`;
+            element.appendChild(inner);
+            element.inner = inner;
+            const text = document.createElement(`div`);
+            text.style[`font-face`] = properties.fontFace;
+            text.style[`font-size`] = `${properties.fontSize * h / 1000}px`;
+            text.style[`font-weight`] = properties.fontWeight;
+            text.style[`font-style`] = properties.fontStyle;
+            text.style[`color`] = properties.fontColor;
+            text.style[`text-align`] = properties.textAlign;
+            inner.appendChild(text);
+            inner.text = text;
         }
     },
 
     doStep: (script, stepno) => {
         const step = script.steps[stepno];
         console.log(step);
+        const block = script.blocks[step.block];
+        switch (block.type) {
+            case `text`:
+                const text = script.content[step.content];
+                block.element.inner.text.innerHTML = text;
+                break;
+            case `image`:
+                break;
+        }
     }
 };
