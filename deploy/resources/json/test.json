@@ -3,38 +3,54 @@
     "description": "A demo presentation that outlines the features of JSON:Presenter",
     "aspectW": 16,
     "aspectH": 9,
-    "default": {
+    "container": {
         "border": "1px solid black",
-        "background": "black",
+        "background": "black"
+    },
+    "defaults": {
         "fontFace": "Times New Roman,serif",
         "fontSize": 50,
-        "panelPadding": "1em"
+        "fontWeight": "normal",
+        "fontStyle": "normal",
+        "fontColor": "white",
+        "textAlign": "left",
+        "blockLeft" : 0,
+        "blockTop" : 0,
+        "blockBackground" : "none",
+        "blockBorder": "none",
+        "blockPadding": "1em"
     },
     "blocks": {
         "title 1": {
             "type": "text",
-            "blockTop": 400,
-            "blockWidth": 1000,
-            "blockHeight": 200,
-            "textAlign": "center",
-            "fontFace": "Helvetica,sans-serif",
-            "fontSize": 200,
-            "fontWeight": "bold"
+            "spec": {
+                "blockTop": 300,
+                "blockWidth": 1000,
+                "blockHeight": 300,
+                "textAlign": "center",
+                "fontFace": "Helvetica,sans-serif",
+                "fontSize": 200,
+                "fontWeight": "bold"
+            }
         },
         "title 2": {
             "type": "text",
-            "blockWidth": 1000,
-            "blockHeight": 150,
-            "textAlign": "center",
-            "fontFace": "Helvetica,sans-serif",
-            "fontSize": 100,
-            "fontWeight": "bold"
+            "spec": {
+                "blockWidth": 1000,
+                "blockHeight": 150,
+                "textAlign": "center",
+                "fontFace": "Helvetica,sans-serif",
+                "fontSize": 100,
+                "fontWeight": "bold"
+            }
         },
         "body": {
             "type": "text",
-            "blockTop": 200,
-            "blockWidth": 1000,
-            "blockHeight": 800
+            "spec": {
+                "blockTop": 200,
+                "blockWidth": 1000,
+                "blockHeight": 800
+            }
         }
     },
     "content":  {
@@ -51,8 +67,26 @@
     },
     "steps": [
         {
-            "block": "title 1",
-            "content": "presenter title"
+            "action": "show",
+            "items": [
+                {
+                    "block": "title 1",
+                    "content": "presenter title"
+                }
+            ]
+        },
+        {
+            "action": "hold",
+            "duration": 10
+        },
+        {
+            "action": "hide",
+            "items": [
+                {
+                    "block": "title 1",
+                    "content": "presenter title"
+                }
+            ]
         }
     ]
 }
