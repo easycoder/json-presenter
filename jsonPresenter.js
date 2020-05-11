@@ -133,8 +133,8 @@ const JSON_Presenter = {
             element.style[`background`] = properties.blockBackground;
             element.style[`border`] = properties.blockBorder;
             container.appendChild(element);
-            const paddingTop = properties.blockPaddingTop;
-            const paddingLeft = properties.blockPaddingLeft;
+            const paddingLeft = `${properties.blockPaddingLeft * w / 1000}px`;
+            const paddingTop = `${properties.blockPaddingTop * h / 1000}px`;
             const inner = document.createElement(`div`);
             inner.style[`position`] = `absolute`;
             inner.style[`left`] = paddingLeft;
