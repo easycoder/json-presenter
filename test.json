@@ -69,13 +69,18 @@
     },
     "steps": [
         {
-            "action": "hold",
-            "duration": 2
+            "comment": "-------------------- Create the title and body blocks",
+            "action": "create",
+            "blocks": [
+                "title 1",
+                "title 2",
+                "body"
+            ]
         },
         {
-            "comment": "--- Slide 1 -------------------------------------------",
+            "comment": "---------------------------------- Set up the content",
             "action": "set content",
-            "items": [
+            "blocks": [
                 {
                     "block": "title 1",
                     "content": "presenter title"
@@ -91,23 +96,32 @@
             ]
         },
         {
+            "comment": "------------------------------- Pause before we start",
+            "action": "hold",
+            "duration": 2
+        },
+        {
+            "comment": "----------------------------------- Fade up the title",
             "action": "fade up",
-            "items": "title 1",
+            "blocks": "title 1",
             "duration": 3,
             "wait": true
         },
         {
+            "comment": "---------------------------------- Hold for 4 seconds",
             "action": "hold",
             "duration": 4
         },
         {
+            "comment": "--------------------------------- Fade down the title",
             "action": "fade down",
-            "items": "title 1",
+            "blocks": "title 1",
             "duration": 1
         },
         {
+            "comment": "-------------------------- Fade up the title and body",
             "action": "fade up",
-            "items": [
+            "blocks": [
                 "title 2",
                 "body"
             ],
@@ -115,6 +129,7 @@
             "wait": true
         },
         {
+            "comment": "--------------------------------- Hold for 10 seconds",
             "action": "hold",
             "duration": 10
         }

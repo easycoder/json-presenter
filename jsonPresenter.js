@@ -103,9 +103,24 @@ const JSON_Presenter = {
                 properties[name] = block.spec[name];
             }
             block.properties = properties;
-            // Create the block
+            block.container = container;
+        }
+    },
+
+    // Run a step
+    doStep: (script, stepno) => {
+        const goto = (script, stepno) => {
+            if (stepno < script.steps.length) {
+                JSON_Presenter.doStep(script, stepno);
+            }
+        };
+
+        // Create an element.
+        const createElement = (block) => {
+            const container = block.container;
             w = Math.round(container.getBoundingClientRect().width);
             h = Math.round(container.getBoundingClientRect().height);
+            const properties = block.properties;
             const element = document.createElement(`div`);
             block.element = element;
             element.style[`position`] = `absolute`;
@@ -135,17 +150,39 @@ const JSON_Presenter = {
             text.style[`text-align`] = properties.textAlign;
             inner.appendChild(text);
             inner.text = text;
-        }
-    },
+        };
 
-    // Run a step
-    doStep: (script, stepno) => {
-        const goto = (script, stepno) => {
-            if (stepno < script.steps.length) {
-                JSON_Presenter.doStep(script, stepno);
+        // Set the content of blocks
+        const doSetContent = (script, step) => {
+            for (const item of step.blocks) {
+                const block = script.blocks[item.block];
+                switch (block.type) {
+                    case `text`:
+                        let content = script.content[item.content];
+                        if (Array.isArray(content)) {
+                            content = content.join(`<br><br>`);
+                        }
+                        content = content.split(`\n`).join(`<br>`);
+                        block.element.inner.text.innerHTML = content.split(`\n`).join(`<br>`);
+                    break;
+                    case `image`:
+                        break;
+                }
             }
         };
         
+        // Create an element
+        const doCreate = (script, step) => {
+            if (Array.isArray(step.blocks)) {
+                for (const block of step.blocks)
+                {
+                    createElement(script.blocks[block]);
+                }
+            } else {
+                createElement(script.blocks[step.blocks]);
+            }
+        };
+
         // Process a single fade step
         const doFadeStep = (element, steps, n, upDown, onFinish) => {
             if (upDown) {
@@ -169,11 +206,10 @@ const JSON_Presenter = {
         // Handle a fade up or down
         const doFade = (script, step, stepno, upDown) => {
             const steps = Math.round(parseFloat(step.duration) * 25);
-            if (Array.isArray(step.items)) {
-                var items = step.items.length;
-                for (const item of step.items)
+            if (Array.isArray(step.blocks)) {
+                for (const block of step.blocks)
                 {
-                    const element = script.blocks[item].element;
+                    const element = script.blocks[block].element;
                     element.style[`opacity`] = upDown ? 0.0 : 1.0;
                     if (upDown) {
                         element.style[`display`] = `block`;
@@ -186,7 +222,7 @@ const JSON_Presenter = {
                     });
                 }
             } else {
-                const element = script.blocks[step.items].element;
+                const element = script.blocks[step.blocks].element;
                 element.style[`opacity`] = upDown ? 0.0 : 1.0;
                 if (upDown) {
                     element.style[`display`] = `block`;
@@ -204,13 +240,13 @@ const JSON_Presenter = {
 
         // Show or hide an element
         const doShowHide = (script, step, showHide) => {
-            if (Array.isArray(step.item)) {
-                for (const item of step.items)
+            if (Array.isArray(step.blocks)) {
+                for (const block of step.blocks)
                 {
-                    script.blocks[item.block].element.style[`display`] = showHide ? `block` : `none`;
+                    script.blocks[block].element.style[`display`] = showHide ? `block` : `none`;
                 }
             } else {
-                script.blocks[step.items].element.style[`display`] = showHide ? `block` : `none`;
+                script.blocks[step.blocks].element.style[`display`] = showHide ? `block` : `none`;
             }
         };
 
@@ -218,20 +254,11 @@ const JSON_Presenter = {
         const step = script.steps[stepno];
         switch (step.action) {
             case `set content`:
-                for (const item of step.items) {
-                    const block = script.blocks[item.block];
-                    switch (block.type) {
-                        case `text`:
-                            let content = script.content[item.content];
-                            if (Array.isArray(content)) {
-                                content = content.join(`<br><br>`);
-                            }
-                            block.element.inner.text.innerHTML = content.split(`\n`).join(`<br>`);
-                        break;
-                        case `image`:
-                            break;
-                    }
-                }
+                doSetContent(script, step);
+                goto(script, stepno + 1);
+                break;
+            case `create`:
+                doCreate(script, step);
                 goto(script, stepno + 1);
                 break;
             case `show`:
