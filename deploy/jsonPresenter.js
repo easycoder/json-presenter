@@ -70,6 +70,7 @@ const JSON_Presenter = {
         ];
 
         const script = JSON.parse(text);
+        document.title = script.title;
         const height = Math.round(parseFloat(container.offsetWidth) * script.aspectH / script.aspectW);
         container.style[`height`] = `${Math.round(height)}px`;
         container.style[`position`] = `relative`;
@@ -116,12 +117,13 @@ const JSON_Presenter = {
             element.style[`background`] = properties.blockBackground;
             element.style[`border`] = properties.blockBorder;
             container.appendChild(element);
-            const padding = properties.blockPadding;
+            const paddingTop = properties.blockPaddingTop;
+            const paddingLeft = properties.blockPaddingLeft;
             const inner = document.createElement(`div`);
             inner.style[`position`] = `absolute`;
-            inner.style[`left`] = padding;
-            inner.style[`top`] = padding;
-            inner.style[`width`] = `calc(100% - ${padding} - ${padding})`;
+            inner.style[`left`] = paddingLeft;
+            inner.style[`top`] = paddingTop;
+            inner.style[`width`] = `calc(100% - ${paddingLeft} - ${paddingLeft})`;
             element.appendChild(inner);
             element.inner = inner;
             const text = document.createElement(`div`);
@@ -136,42 +138,120 @@ const JSON_Presenter = {
         }
     },
 
+    // Run a step
     doStep: (script, stepno) => {
         const goto = (script, stepno) => {
-            JSON_Presenter.doStep(script, stepno);
+            if (stepno < script.steps.length) {
+                JSON_Presenter.doStep(script, stepno);
+            }
         };
+        
+        // Process a single fade step
+        const doFadeStep = (element, steps, n, upDown, onFinish) => {
+            if (upDown) {
+                element.style[`opacity`] = parseFloat(n) / steps;
+            } else {
+                element.style[`opacity`] = 1.0 - parseFloat(n) / steps;
+            }
+            if (n < steps) {
+                setTimeout(function () {
+                    doFadeStep(element, steps, n + 1, upDown, onFinish);
+                }, 40);
+            } else {
+                element.style[`opacity`] = upDown ? 1.0 : 0.0;
+                if (!upDown) {
+                    element.style[`display`] = `none`;
+                }
+                onFinish();
+            }
+        };
+
+        // Handle a fade up or down
+        const doFade = (script, step, stepno, upDown) => {
+            const steps = Math.round(parseFloat(step.duration) * 25);
+            if (Array.isArray(step.items)) {
+                var items = step.items.length;
+                for (const item of step.items)
+                {
+                    const element = script.blocks[item].element;
+                    element.style[`opacity`] = upDown ? 0.0 : 1.0;
+                    if (upDown) {
+                        element.style[`display`] = `block`;
+                    }
+                    doFadeStep(element, steps, 0, upDown, function () {
+                        items--;
+                        if (items === 0 && step.wait) {
+                            goto(script, stepno + 1);
+                        }
+                    });
+                }
+            } else {
+                const element = script.blocks[step.items].element;
+                element.style[`opacity`] = upDown ? 0.0 : 1.0;
+                if (upDown) {
+                    element.style[`display`] = `block`;
+                }
+                doFadeStep(element, steps, 0, upDown, function () {
+                    if (step.wait) {
+                        goto(script, stepno + 1);
+                    }
+                });
+            }
+            if (!step.wait) {
+                goto(script, stepno + 1);
+            }
+        };
+
+        // Show or hide an element
+        const doShowHide = (script, step, showHide) => {
+            if (Array.isArray(step.item)) {
+                for (const item of step.items)
+                {
+                    script.blocks[item.block].element.style[`display`] = showHide ? `block` : `none`;
+                }
+            } else {
+                script.blocks[step.items].element.style[`display`] = showHide ? `block` : `none`;
+            }
+        };
+
+        // Process a single step
         const step = script.steps[stepno];
         switch (step.action) {
-            case `show`:
+            case `set content`:
                 for (const item of step.items) {
                     const block = script.blocks[item.block];
                     switch (block.type) {
                         case `text`:
                             let content = script.content[item.content];
-                            if (content[0] === `[`) {
-                                content = JSON.parse(content).join(`<br><br>`);
+                            if (Array.isArray(content)) {
+                                content = content.join(`<br><br>`);
                             }
                             block.element.inner.text.innerHTML = content.split(`\n`).join(`<br>`);
                         break;
                         case `image`:
                             break;
                     }
-                    block.element.style[`display`] = `block`;
                 }
+                goto(script, stepno + 1);
+                break;
+            case `show`:
+                doShowHide(script, step, true);
                 goto(script, stepno + 1);
                 break;
             case `hide`:
-                for (const item of step.items) {
-                    const block = script.blocks[item.block];
-                     block.element.style[`display`] = `none`;
-                }
+                doShowHide(script, step, false);
                 goto(script, stepno + 1);
                 break;
             case `hold`:
-                const duration = step.duration * 1000;
                 setTimeout(function () {
                     goto(script, stepno + 1);
-                }, duration);
+                }, step.duration * 1000);
+                break;
+            case `fade up`:
+                doFade(script, step, stepno, true);
+                break;
+            case `fade down`:
+                doFade(script, step, stepno, false);
                 break;
         }
     }

@@ -1,5 +1,5 @@
 {
-    "name": "JSON:Presenter",
+    "title": "JSON:Presenter",
     "description": "A demo presentation that outlines the features of JSON:Presenter",
     "aspectW": 16,
     "aspectH": 9,
@@ -9,7 +9,7 @@
     },
     "defaults": {
         "fontFace": "Times New Roman,serif",
-        "fontSize": 50,
+        "fontSize": 40,
         "fontWeight": "normal",
         "fontStyle": "normal",
         "fontColor": "white",
@@ -18,7 +18,8 @@
         "blockTop" : 0,
         "blockBackground" : "none",
         "blockBorder": "none",
-        "blockPadding": "1em"
+        "blockPaddingLeft": "1em",
+        "blockPaddingTop": "0"
     },
     "blocks": {
         "title 1": {
@@ -41,7 +42,8 @@
                 "textAlign": "center",
                 "fontFace": "Helvetica,sans-serif",
                 "fontSize": 100,
-                "fontWeight": "bold"
+                "fontWeight": "bold",
+                "blockPaddingTop": "1em"
             }
         },
         "body": {
@@ -49,44 +51,72 @@
             "spec": {
                 "blockTop": 200,
                 "blockWidth": 1000,
-                "blockHeight": 800
+                "blockHeight": 800,
+                "blockPaddingLeft": "8em",
+                "blockPaddingTop": "4em"
             }
         }
     },
     "content":  {
         "presenter title": "JSON:Presenter",
         "slide 1": [
-            "JSON:Presenter&copy; lets you create PowerPoint-like presentations that can be run anywhere equipped with a suitable presentation engine; most notably in a web browser.",
+            "JSON:Presenter<sup>&copy;</sup> is a presentation format using JSON, that lets you create presentations that run in a web browser. Presentations can be similar to those created using PowerPoint or they can be considerably more elaborate, with extensive animation and sound.",
             
-            "Web-based presentations can run from any host, including static; all you need is one CDN-hosted JavaScript file and you're good to go.",
+            "Presentations can run from any host, including static; all you need is one CDN-hosted JavaScript file and you're good to go.",
             
-            "Rather than being created in a GUI, presentations are JSON text files having a format that can be implemented by any suitable engine.",
-            
-            "The first engine available is a component of the EasyCoder&trade; browser scripting language but it can be used completely independently of the latter."
+            "The JSON:Presenter<sup>&copy;</sup> engine is pure JavaScript. It can be used with any JavaScript framework, or with none."
         ]
     },
     "steps": [
         {
-            "action": "show",
+            "action": "hold",
+            "duration": 2
+        },
+        {
+            "comment": "--- Slide 1 -------------------------------------------",
+            "action": "set content",
             "items": [
                 {
                     "block": "title 1",
                     "content": "presenter title"
+                },
+                {
+                    "block": "title 2",
+                    "content": "presenter title"
+                },
+                {
+                    "block": "body",
+                    "content": "slide 1"
                 }
             ]
+        },
+        {
+            "action": "fade up",
+            "items": "title 1",
+            "duration": 3,
+            "wait": true
+        },
+        {
+            "action": "hold",
+            "duration": 4
+        },
+        {
+            "action": "fade down",
+            "items": "title 1",
+            "duration": 1
+        },
+        {
+            "action": "fade up",
+            "items": [
+                "title 2",
+                "body"
+            ],
+            "duration": 1,
+            "wait": true
         },
         {
             "action": "hold",
             "duration": 10
-        },
-        {
-            "action": "hide",
-            "items": [
-                {
-                    "block": "title 1",
-                    "content": "presenter title"
-                }
-            ]
         }
     ]
 }
