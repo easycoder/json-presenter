@@ -207,6 +207,7 @@ const JSON_Presenter = {
         const doFade = (script, step, stepno, upDown) => {
             const steps = Math.round(parseFloat(step.duration) * 25);
             if (Array.isArray(step.blocks)) {
+                let blocks = step.blocks.length;
                 for (const block of step.blocks)
                 {
                     const element = script.blocks[block].element;
@@ -215,8 +216,8 @@ const JSON_Presenter = {
                         element.style[`display`] = `block`;
                     }
                     doFadeStep(element, steps, 0, upDown, function () {
-                        items--;
-                        if (items === 0 && step.wait) {
+                        blocks--;
+                        if (blocks === 0 && step.wait) {
                             goto(script, stepno + 1);
                         }
                     });
