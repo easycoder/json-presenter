@@ -22,7 +22,7 @@
         "blockPaddingTop": "0"
     },
     "blocks": {
-        "title 1": {
+        "intro title": {
             "type": "text",
             "spec": {
                 "blockTop": 300,
@@ -34,7 +34,7 @@
                 "fontWeight": "bold"
             }
         },
-        "title 2": {
+        "main title": {
             "type": "text",
             "spec": {
                 "blockWidth": 1000,
@@ -122,7 +122,7 @@
             "comment": "-------------------------- Fade up the title and body",
             "action": "fade up",
             "blocks": [
-                "title 2",
+                "title 1",
                 "body"
             ],
             "duration": 1,
@@ -132,6 +132,16 @@
             "comment": "--------------------------------- Hold for 10 seconds",
             "action": "hold",
             "duration": 10
+        },
+        {
+            "comment": "------------------------ Fade down the title and body",
+            "action": "fade down",
+            "blocks": [
+                "title 1",
+                "body"
+            ],
+            "duration": 1,
+            "wait": true
         }
     ]
 }
