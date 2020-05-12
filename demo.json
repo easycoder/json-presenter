@@ -60,7 +60,7 @@
     "content":  {
         "presenter title": "JSON::Presenter",
         "slide 1": [
-            "JSON::Presenter<sup>&copy;</sup> is a presentation format using JSON scripts and an engine that runs those scripts in a browser to create presentations. These may be similar to those created using PowerPoint or they can be considerably more elaborate, with extensive animation and even sound. In some cases they can take the place of video yet still offer a dynamic experience.",
+            "JSON::Presenter<sup>&copy;</sup> is a presentation format using JSON scripts, and an engine that runs those scripts in a browser to create presentations. These may be similar to those created using PowerPoint or they can be considerably more elaborate, with extensive animation and even sound. In some cases they can take the place of video yet still offer a dynamic experience.",
             
             "Presentations can run from any host, including static; all you need is one CDN-hosted JavaScript file and you're good to go.",
             
@@ -91,7 +91,7 @@
             ]
         },
         {
-            "comment": "----------------------------- A pause before we start",
+            "comment": "------------------------------- Pause before we start",
             "action": "hold",
             "duration": 2
         },
