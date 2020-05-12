@@ -1,6 +1,6 @@
 {
     "title": "JSON:Presenter",
-    "description": "A demo presentation that outlines the features of JSON:Presenter",
+    "description": "A demo presentation that outlines some features of JSON:Presenter",
     "aspectW": 16,
     "aspectH": 9,
     "container": {
@@ -8,7 +8,7 @@
         "background": "black"
     },
     "defaults": {
-        "fontFace": "Times New Roman,serif",
+        "fontFamily": "Times New Roman,serif",
         "fontSize": 40,
         "fontWeight": "normal",
         "fontStyle": "normal",
@@ -16,51 +16,51 @@
         "textAlign": "left",
         "blockLeft" : 0,
         "blockTop" : 0,
+        "blockWidth": 1000,
         "blockBackground" : "none",
         "blockBorder": "none",
-        "blockPaddingLeft": "1em",
-        "blockPaddingTop": "0"
+        "blockPaddingLeft": 20,
+        "blockPaddingTop": 0
     },
     "blocks": {
-        "intro title": {
+        "title": {
             "type": "text",
             "spec": {
                 "blockTop": 300,
-                "blockWidth": 1000,
                 "blockHeight": 300,
                 "textAlign": "center",
-                "fontFace": "Helvetica,sans-serif",
                 "fontSize": 200,
-                "fontWeight": "bold"
+                "fontWeight": "bold",
+                "fontColor": "#800000"
             }
         },
-        "main title": {
+        "title 2": {
             "type": "text",
             "spec": {
-                "blockWidth": 1000,
+                "blockTop": 50,
                 "blockHeight": 150,
                 "textAlign": "center",
-                "fontFace": "Helvetica,sans-serif",
                 "fontSize": 100,
                 "fontWeight": "bold",
-                "blockPaddingTop": "1em"
+                "fontColor": "#00dddd"
             }
         },
         "body": {
             "type": "text",
             "spec": {
                 "blockTop": 200,
-                "blockWidth": 1000,
                 "blockHeight": 800,
-                "blockPaddingLeft": "8em",
-                "blockPaddingTop": "4em"
+                "blockPaddingLeft": 80,
+                "blockPaddingTop": 40,
+                "fontFamily": "Helvetica,sans-serif",
+                "fontColor": "#00ffff"
             }
         }
     },
     "content":  {
         "presenter title": "JSON:Presenter",
         "slide 1": [
-            "JSON:Presenter<sup>&copy;</sup> is a presentation format using JSON, that lets you create presentations that run in a web browser. Presentations can be similar to those created using PowerPoint or they can be considerably more elaborate, with extensive animation and sound.",
+            "JSON:Presenter<sup>&copy;</sup> is a presentation format using JSON scripts and an engine that runs those scripts in a browser to create presentations. These may be similar to those created using PowerPoint or they can be considerably more elaborate, with extensive animation and even sound. In some cases they can take the place of video yet still offer a dynamic experience.",
             
             "Presentations can run from any host, including static; all you need is one CDN-hosted JavaScript file and you're good to go.",
             
@@ -72,8 +72,7 @@
             "comment": "-------------------- Create the title and body blocks",
             "action": "create",
             "blocks": [
-                "title 1",
-                "title 2",
+                "title",
                 "body"
             ]
         },
@@ -82,11 +81,7 @@
             "action": "set content",
             "blocks": [
                 {
-                    "block": "title 1",
-                    "content": "presenter title"
-                },
-                {
-                    "block": "title 2",
+                    "block": "title",
                     "content": "presenter title"
                 },
                 {
@@ -96,40 +91,45 @@
             ]
         },
         {
-            "comment": "------------------------------- Pause before we start",
+            "comment": "----------------------------- A pause before we start",
             "action": "hold",
             "duration": 2
         },
         {
-            "comment": "----------------------------------- Fade up the title",
+            "comment": "-------------------------------- Show the intro title",
             "action": "fade up",
-            "blocks": "title 1",
+            "blocks": "title",
             "duration": 3,
             "wait": true
         },
         {
-            "comment": "---------------------------------- Hold for 4 seconds",
+            "comment": "-------------------------------------- Wait 4 seconds",
             "action": "hold",
             "duration": 4
         },
         {
-            "comment": "--------------------------------- Fade down the title",
-            "action": "fade down",
-            "blocks": "title 1",
-            "duration": 1
-        },
-        {
-            "comment": "-------------------------- Fade up the title and body",
-            "action": "fade up",
-            "blocks": [
-                "title 1",
-                "body"
+            "comment": "-------------------------------- Transition the title",
+            "action": "transition",
+            "type": [
+                "block position",
+                "block size",
+                "font color",
+                "font size"
             ],
+            "block": "title",
+            "target": "title 2",
             "duration": 1,
             "wait": true
         },
         {
-            "comment": "--------------------------------- Hold for 10 seconds",
+            "comment": "-------------------------------- Show the first slide",
+            "action": "fade up",
+            "blocks": "body",
+            "duration": 1,
+            "wait": true
+        },
+        {
+            "comment": "------------------------------------- Wait 10 seconds",
             "action": "hold",
             "duration": 10
         },
@@ -137,10 +137,10 @@
             "comment": "------------------------ Fade down the title and body",
             "action": "fade down",
             "blocks": [
-                "title 1",
+                "title",
                 "body"
             ],
-            "duration": 1,
+            "duration": 3,
             "wait": true
         }
     ]
