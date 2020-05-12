@@ -36,7 +36,7 @@ window.onload = () => {
     request.onload = () => {
         if (200 <= request.status && request.status < 400) {
             JSON_Presenter.present(container, request.responseText);
-        } else {
+     } else {
             throw Error(`Unable to access the JSON script`);
         }
     };
@@ -49,6 +49,8 @@ window.onload = () => {
 };
 
 const JSON_Presenter = {
+
+    stepno: 0,
 
     present: (container, text) => {
         const containerStyles = [
@@ -80,7 +82,7 @@ const JSON_Presenter = {
         } 
         container.style[`background-size`] = `cover`;
         JSON_Presenter.doBlocks(container, script.blocks, script.defaults);
-        JSON_Presenter.doStep(script, 0);
+        JSON_Presenter.doStep(script);
     },
 
     // Process a style property
@@ -108,15 +110,8 @@ const JSON_Presenter = {
         }
     },
 
-    // Run a step
-    doStep: (script, stepno) => {
-        const goto = (script, stepno) => {
-            if (stepno < script.steps.length) {
-                setTimeout(function () {
-                    JSON_Presenter.doStep(script, stepno);
-                }, 1);
-            }
-        };
+    // Handle a step
+    doStep: (script) => {
 
         // Create an element.
         const createElement = (block) => {
@@ -127,7 +122,7 @@ const JSON_Presenter = {
             const element = document.createElement(`div`);
             block.element = element;
             element.style[`position`] = `absolute`;
-            element.style[`display`] = `none`;
+            element.style[`opacity`] = `0.0`;
             element.style[`left`] = properties.blockLeft * w / 1000;
             element.style[`top`] = properties.blockTop * h / 1000;
             element.style[`width`] = `${properties.blockWidth * w / 1000}px`;
@@ -186,88 +181,45 @@ const JSON_Presenter = {
             }
         };
 
-        // Process a single fade step
-        const doFadeStep = (element, steps, n, upDown, onFinish) => {
-            if (upDown) {
-                element.style[`opacity`] = parseFloat(n) / steps;
-            } else {
-                element.style[`opacity`] = 1.0 - parseFloat(n) / steps;
-            }
-            if (n < steps) {
-                setTimeout(function () {
-                    doFadeStep(element, steps, n + 1, upDown, onFinish);
-                }, 40);
-            } else {
-                element.style[`opacity`] = upDown ? 1.0 : 0.0;
-                if (!upDown) {
-                    element.style[`display`] = `none`;
-                }
-                onFinish();
-            }
-        };
-
-        // Handle a fade up or down
-        const doFade = (script, step, stepno, upDown) => {
-            const steps = Math.round(parseFloat(step.duration) * 25);
-            if (Array.isArray(step.blocks)) {
-                let blocks = step.blocks.length;
-                for (const block of step.blocks)
-                {
-                    const element = script.blocks[block].element;
-                    element.style[`opacity`] = upDown ? 0.0 : 1.0;
-                    if (upDown) {
-                        element.style[`display`] = `block`;
-                    }
-                    doFadeStep(element, steps, 0, upDown, () => {
-                        blocks--;
-                        if (blocks === 0 && step.wait) {
-                            goto(script, stepno + 1);
-                        }
-                    });
-                }
-            } else {
-                const element = script.blocks[step.blocks].element;
-                element.style[`opacity`] = upDown ? 0.0 : 1.0;
-                if (upDown) {
-                    element.style[`display`] = `block`;
-                }
-                doFadeStep(element, steps, 0, upDown, () => {
-                    if (step.wait) {
-                        goto(script, stepno + 1);
-                    }
-                });
-            }
-            if (!step.wait) {
-                goto(script, stepno + 1);
-            }
-        };
-
         // Show or hide an element
         const doShowHide = (script, step, showHide) => {
             if (Array.isArray(step.blocks)) {
                 for (const block of step.blocks)
                 {
-                    script.blocks[block].element.style[`display`] = showHide ? `block` : `none`;
+                    script.blocks[block].element.style[`opacity`] = showHide ? `1.0` : `0.0`;
                 }
             } else {
-                script.blocks[step.blocks].element.style[`display`] = showHide ? `block` : `none`;
+                script.blocks[step.blocks].element.style[`opacity`] = showHide ? `1.0` : `0.0`;
             }
         };
 
-        // Process a single transition step
-        const doTransitionStep = (block, target, step, nSteps, n, transition, onFinish) => {
-            transition(block, target, step, nSteps, n);
-            if (n < nSteps) {
-                setTimeout(function () {
-                    doTransitionStep(block, target, step, nSteps, n + 1, transition, onFinish);
-                }, 40);
-            } else {
-                onFinish();
-            }
+        const doFade = (script, step, upDown) => {
+            const animSteps = Math.round(step.duration * 25);
+            var animStep = 0;
+            const interval = setInterval(function () {
+                if (animStep < animSteps) {
+                    const ratio = parseFloat(animStep) / animSteps;
+                    if (Array.isArray(step.blocks)) {
+                        let blocks = step.blocks.length;
+                        for (const block of step.blocks)
+                        {
+                            const element = script.blocks[block].element;
+                            element.style[`opacity`] = upDown ? ratio : 1.0 - ratio;
+                        }
+                    } else {
+                        const element = script.blocks[step.blocks].element;
+                        element.style[`opacity`] = upDown ? ratio : 1.0 - ratio;
+                    }
+                    animStep++;
+                } else {
+                    clearInterval(interval);
+                    JSON_Presenter.doStep(script);
+                }
+             }, 40);
         };
 
         // Compute a block size
-        const setComputedBlockSize = (block, target, nSteps, n) => {
+        const setComputedBlockSize = (block, target, ratio) => {
             const boundingRect = block.container.getBoundingClientRect();
             w = Math.round(boundingRect.width);
             h = Math.round(boundingRect.height);
@@ -276,13 +228,13 @@ const JSON_Presenter = {
             const endWidth = target.properties.blockWidth * w / 1000;
             const endHeight = target.properties.blockHeight * h / 1000;
             block.element.style[`width`] = 
-                `${width + Math.round((endWidth - width) * n / nSteps)}px`;
+                `${width + Math.round((endWidth - width) * ratio)}px`;
             block.element.style[`height`] = 
-                `${height + Math.round((endHeight - height) * n / nSteps)}px`;
+                `${height + Math.round((endHeight - height) * ratio)}px`;
         };
 
         // Compute a block position
-        const setComputedBlockPosition = (block, target, nSteps, n) => {
+        const setComputedBlockPosition = (block, target, ratio) => {
             const boundingRect = block.container.getBoundingClientRect();
             w = Math.round(boundingRect.width);
             h = Math.round(boundingRect.height);
@@ -291,22 +243,22 @@ const JSON_Presenter = {
             const endLeft = target.properties.blockLeft * w / 1000;
             const endTop = target.properties.blockTop * h / 1000;
             block.element.style[`left`] = 
-                left + Math.round((endLeft - left) * n / nSteps);
+                left + Math.round((endLeft - left) * ratio);
             block.element.style[`top`] = 
-                top + Math.round((endTop - top) * n / nSteps);
+                top + Math.round((endTop - top) * ratio);
         };
 
         // Compute a font size
-        const setComputedFontSize = (block, target, nSteps, n) => {
-            h = Math.round(script.element.getBoundingClientRect().height);
+        const setComputedFontSize = (block, target, ratio) => {
+            h = Math.round(block.container.getBoundingClientRect().height);
             const size = block.properties.fontSize * h / 1000;
             const endSize = target.properties.fontSize * h / 1000;
             block.element.inner.text.style[`font-size`] = 
-                `${size + Math.round((endSize - size) * n / nSteps)}px`;
+                `${size + Math.round((endSize - size) * ratio)}px`;
         };
 
         // Compute a font color
-        const setComputedFontColor = (block, target, nSteps, n) => {
+        const setComputedFontColor = (block, target, ratio) => {
             const color = block.spec.fontColor;
             const endColor = target.spec.fontColor;
             const rStart = parseInt(color.slice(1, 3), 16);
@@ -315,101 +267,92 @@ const JSON_Presenter = {
             const rFinish = parseInt(endColor.slice(1, 3), 16);
             const gFinish = parseInt(endColor.slice(3, 5), 16);
             const bFinish = parseInt(endColor.slice(5, 7), 16);
-            const red = rStart + Math.round((rFinish - rStart) * n / nSteps);
-            const green = gStart + Math.round((gFinish - gStart) * n / nSteps);
-            const blue = bStart + Math.round((bFinish - bStart) * n / nSteps);
+            const red = rStart + Math.round((rFinish - rStart) * ratio);
+            const green = gStart + Math.round((gFinish - gStart) * ratio);
+            const blue = bStart + Math.round((bFinish - bStart) * ratio);
             const r = ("0" + red.toString(16)).slice(-2);
             const g = ("0" + green.toString(16)).slice(-2);
             const b = ("0" + blue.toString(16)).slice(-2);
             block.element.inner.text.style[`color`] = `#${r}${g}${b}`;
         };
 
-        const computeTransitionValues = (block, target, step, nSteps, n) => {
-            for (const type of step.type) {
-                switch (type) {
-                    case `block size`:
-                        setComputedBlockSize(block, target, nSteps, n);
-                        break;
-                    case `block position`:
-                        setComputedBlockPosition(block, target, nSteps, n);
-                        break;
-                    case `font size`:
-                        setComputedFontSize(block, target, nSteps, n);
-                        break;
-                    case `font color`:
-                        setComputedFontColor(block, target, nSteps, n);
-                        break;
-                    default:
-                        throw Error(`Unknown transition type: '${type}'`);
-                }
+        const doTransitionStep = (type, block, target, ratio) => {
+            switch (type) {
+                case `block size`:
+                    setComputedBlockSize(block, target, ratio);
+                    break;
+                case `block position`:
+                    setComputedBlockPosition(block, target, ratio);
+                    break;
+                case `font size`:
+                    setComputedFontSize(block, target, ratio);
+                    break;
+                case `font color`:
+                    setComputedFontColor(block, target, ratio);
+                    break;
+                default:
+                    throw Error(`Unknown transition type: '${type}'`);
             }
         };
 
-        // Do the transition
-        const computeTransitionStep = (block, target, types, nSteps, n) => {
-            if (Array.isArray(types)) {
-                for (const type of types) {
-                    computeTransitionValues(block, target, type, nSteps, n);
+        const doTransition = (script, step) => {
+            const animSteps = Math.round(step.duration * 25);
+            var animStep = 0;
+            const interval = setInterval(function () {
+                if (animStep < animSteps) {
+                    const ratio = parseFloat(animStep) / animSteps;
+                    const block = script.blocks[step.block];
+                    const target = script.blocks[step.target];
+                    if (Array.isArray(step.type)) {
+                        for (const type of step.type) {
+                            doTransitionStep(type, block, target, ratio);
+                        }
+                    } else {
+                        doTransitionStep(type, block, target, ratio);
+                    }
+                    animStep++;
+                } else {
+                    clearInterval(interval);
+                    JSON_Presenter.doStep(script);
                 }
-            } else {
-                computeTransitionValues(block, target, types, nSteps, n);
-            }
-            h = Math.round(script.element.getBoundingClientRect().height);
-            const size = block.properties.fontSize * h / 1000;
-            const endSize = target.properties.fontSize * h / 1000;
-            block.element.inner.text.style[`font-size`] = 
-                `${size + Math.round((endSize - size) * n / nSteps)}px`;
-        };
-
-        const doTransition = (script, step, stepno) => {
-            const block = script.blocks[step.block];
-            const target = script.blocks[step.target];
-            const nSteps = Math.round(parseFloat(step.duration) * 25);
-            doTransitionStep(block, target, step, nSteps, 0, computeTransitionStep, function() {
-                if (step.wait) {
-                    goto(script, stepno + 1);
-                }
-            });
-            if (!step.wait) {
-                goto(script, stepno + 1);
-            }
+             }, 40);
         };
 
         // Process a single step
-        const step = script.steps[stepno];
-        switch (step.action) {
-            case `set content`:
-                doSetContent(script, step);
-                goto(script, stepno + 1);
-                break;
-            case `create`:
-                doCreate(script, step);
-                goto(script, stepno + 1);
-                break;
-            case `show`:
-                doShowHide(script, step, true);
-                goto(script, stepno + 1);
-                break;
-            case `hide`:
-                doShowHide(script, step, false);
-                goto(script, stepno + 1);
-                break;
-            case `hold`:
-                setTimeout(function () {
-                    goto(script, stepno + 1);
-                }, step.duration * 1000);
-                break;
-            case `fade up`:
-                doFade(script, step, stepno, true);
-                break;
-            case `fade down`:
-                doFade(script, step, stepno, false);
-                break;
-            case`transition`:
-                doTransition(script, step, stepno);
-                break;
-            default:
-                throw Error(`Unknown action: '${step.action}'`);
+        while (JSON_Presenter.stepno < script.steps.length) {
+            const step = script.steps[JSON_Presenter.stepno++];
+            console.log(step.action);
+            switch (step.action) {
+                case `set content`:
+                    doSetContent(script, step);
+                    break;
+                case `create`:
+                    doCreate(script, step);
+                    break;
+                case `show`:
+                    doShowHide(script, step, true);
+                    break;
+                case `hide`:
+                    doShowHide(script, step, false);
+                    break;
+                case `hold`:
+                    setTimeout(function () {
+                        JSON_Presenter.doStep(script);
+                    }, step.duration * 1000);
+                    return;
+                case `fade up`:
+                    doFade(script, step, true);
+                    return;
+                case `fade down`:
+                    doFade(script, step, false);
+                    return;
+                case`transition`:
+                    doTransition(script, step);
+                    return;
+                default:
+                    throw Error(`Unknown action: '${step.action}'`);
+            }
         }
+        console.log(`finished`);
     }
 };

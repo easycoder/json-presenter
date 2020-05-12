@@ -1,6 +1,6 @@
 {
-    "title": "JSON:Presenter",
-    "description": "A demo presentation that outlines some features of JSON:Presenter",
+    "title": "JSON::Presenter",
+    "description": "A demo presentation that outlines some features of JSON::Presenter",
     "aspectW": 16,
     "aspectH": 9,
     "container": {
@@ -42,7 +42,7 @@
                 "textAlign": "center",
                 "fontSize": 100,
                 "fontWeight": "bold",
-                "fontColor": "#00dddd"
+                "fontColor": "#dddd00"
             }
         },
         "body": {
@@ -53,18 +53,18 @@
                 "blockPaddingLeft": 80,
                 "blockPaddingTop": 40,
                 "fontFamily": "Helvetica,sans-serif",
-                "fontColor": "#00ffff"
+                "fontColor": "#dddddd"
             }
         }
     },
     "content":  {
-        "presenter title": "JSON:Presenter",
+        "presenter title": "JSON::Presenter",
         "slide 1": [
-            "JSON:Presenter<sup>&copy;</sup> is a presentation format using JSON scripts and an engine that runs those scripts in a browser to create presentations. These may be similar to those created using PowerPoint or they can be considerably more elaborate, with extensive animation and even sound. In some cases they can take the place of video yet still offer a dynamic experience.",
+            "JSON::Presenter<sup>&copy;</sup> is a presentation format using JSON scripts and an engine that runs those scripts in a browser to create presentations. These may be similar to those created using PowerPoint or they can be considerably more elaborate, with extensive animation and even sound. In some cases they can take the place of video yet still offer a dynamic experience.",
             
             "Presentations can run from any host, including static; all you need is one CDN-hosted JavaScript file and you're good to go.",
             
-            "The JSON:Presenter<sup>&copy;</sup> engine is pure JavaScript. It can be used with any JavaScript framework, or with none."
+            "The JSON::Presenter<sup>&copy;</sup> engine is pure JavaScript. It can be used with any JavaScript framework, or with none."
         ]
     },
     "steps": [
@@ -96,7 +96,7 @@
             "duration": 2
         },
         {
-            "comment": "-------------------------------- Show the intro title",
+            "comment": "----------------------------- Fade up the intro title",
             "action": "fade up",
             "blocks": "title",
             "duration": 3,
