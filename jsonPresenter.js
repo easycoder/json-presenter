@@ -193,10 +193,11 @@ const JSON_Presenter = {
             }
         };
 
+        // Fade up or down
         const doFade = (script, step, upDown) => {
             const animSteps = Math.round(step.duration * 25);
             var animStep = 0;
-            const interval = setInterval(function () {
+            const interval = setInterval(() => {
                 if (animStep < animSteps) {
                     const ratio = parseFloat(animStep) / animSteps;
                     if (Array.isArray(step.blocks)) {
@@ -276,6 +277,7 @@ const JSON_Presenter = {
             block.element.inner.text.style[`color`] = `#${r}${g}${b}`;
         };
 
+        // Handle a single step of a transition
         const doTransitionStep = (type, block, target, ratio) => {
             switch (type) {
                 case `block size`:
@@ -295,10 +297,11 @@ const JSON_Presenter = {
             }
         };
 
+        // Handle a transition
         const doTransition = (script, step) => {
             const animSteps = Math.round(step.duration * 25);
             var animStep = 0;
-            const interval = setInterval(function () {
+            const interval = setInterval(() => {
                 if (animStep < animSteps) {
                     const ratio = parseFloat(animStep) / animSteps;
                     const block = script.blocks[step.block];
@@ -336,7 +339,7 @@ const JSON_Presenter = {
                     doShowHide(script, step, false);
                     break;
                 case `hold`:
-                    setTimeout(function () {
+                    setTimeout(() => {
                         JSON_Presenter.doStep(script);
                     }, step.duration * 1000);
                     return;
