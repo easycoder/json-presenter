@@ -102,8 +102,8 @@ const JSON_Presenter = {
                 properties[name] = defaults[name];
             }
             // Override with local values
-            for (const name in block.spec) {
-                properties[name] = block.spec[name];
+            for (const name in block) {
+                properties[name] = block[name];
             }
             block.properties = properties;
             block.container = container;
@@ -154,13 +154,13 @@ const JSON_Presenter = {
         const doSetContent = (script, step) => {
             for (const item of step.blocks) {
                 const block = script.blocks[item.block];
-                switch (block.type) {
+                const spec = script.content[item.content];
+                switch (spec.type) {
                     case `text`:
-                        let content = script.content[item.content];
+                        let content = spec.content;
                         if (Array.isArray(content)) {
                             content = content.join(`<br><br>`);
                         }
-                        content = content.split(`\n`).join(`<br>`);
                         block.element.inner.text.innerHTML = content.split(`\n`).join(`<br>`);
                     break;
                     case `image`:
@@ -199,7 +199,7 @@ const JSON_Presenter = {
             var animStep = 0;
             const interval = setInterval(() => {
                 if (animStep < animSteps) {
-                    const ratio =  0.5 - Math.cos(parseFloat(animStep) / animSteps * 180 * 0.01745329) / 2;
+                    const ratio =  0.5 - Math.cos(Math.PI * animStep / animSteps) / 2;
                     if (Array.isArray(step.blocks)) {
                         let blocks = step.blocks.length;
                         for (const block of step.blocks)
@@ -214,9 +214,87 @@ const JSON_Presenter = {
                     animStep++;
                 } else {
                     clearInterval(interval);
-                    JSON_Presenter.doStep(script);
+                    if (!step.continue) {
+                        JSON_Presenter.doStep(script);
+                    }
                 }
              }, 40);
+             if (step.continue) {
+                 JSON_Presenter.doStep(script);
+             }
+        };
+
+        // Handle a crossfade
+        const doCrossfade = (script, step) => {
+            const block = script.blocks[step.block];
+            const properties = block.properties;
+            const target = {};
+            const content = script.content[step.target];
+            let newText = content.content;
+            if (Array.isArray(newText)) {
+                newText = newText.join(`<br><br>`);
+            }
+            newText = newText.split(`\n`).join(`<br>`);
+            switch (content.type) {
+                case `text`:
+                    const element = document.createElement(`div`);
+                    element.style[`position`] = `absolute`;
+                    element.style[`opacity`] = `0.0`;
+                    element.style[`left`] = properties.blockLeft * w / 1000;
+                    element.style[`top`] = properties.blockTop * h / 1000;
+                    element.style[`width`] = `${properties.blockWidth * w / 1000}px`;
+                    element.style[`height`] = `${properties.blockHeight * h / 1000}px`;
+                    element.style[`background`] = properties.blockBackground;
+                    element.style[`border`] = properties.blockBorder;
+                    block.container.appendChild(element);
+                    target.element = element;
+                    const paddingLeft = `${properties.blockPaddingLeft * w / 1000}px`;
+                    const paddingTop = `${properties.blockPaddingTop * h / 1000}px`;
+                    const inner = document.createElement(`div`);
+                    inner.style[`position`] = `absolute`;
+                    inner.style[`left`] = paddingLeft;
+                    inner.style[`top`] = paddingTop;
+                    inner.style[`width`] = `calc(100% - ${paddingLeft} - ${paddingLeft})`;
+                    element.appendChild(inner);
+                    const text = document.createElement(`div`);
+                    text.style[`font-family`] = properties.fontFamily;
+                    text.style[`font-size`] = `${properties.fontSize * h / 1000}px`;
+                    text.style[`font-weight`] = properties.fontWeight;
+                    text.style[`font-style`] = properties.fontStyle;
+                    text.style[`color`] = properties.fontColor;
+                    text.style[`text-align`] = properties.textAlign;
+                    inner.appendChild(text);
+                    text.innerHTML = newText;
+                    break;
+                default:
+                    throw Error(`Unknown content type: '${content.type}'`);
+            }
+
+            const animSteps = Math.round(step.duration * 25);
+            var animStep = 0;
+            const interval = setInterval(() => {
+                if (animStep < animSteps) {
+                    const ratio =  0.5 - Math.cos(Math.PI * animStep / animSteps) / 2;
+                    block.element.style[`opacity`] = 1.0 - ratio;
+                    target.element.style[`opacity`] = ratio;
+                    animStep++;
+                } else {
+                    clearInterval(interval);
+                    switch (content.type) {
+                        case `text`:
+                            block.element.inner.text.innerHTML = newText;
+                            block.element.style[`opacity`] = 1.0 ;
+                            block.container.removeChild(target.element);
+                            break;
+                    }
+                    if (!step.continue) {
+                        JSON_Presenter.doStep(script);
+                    }
+                }
+             }, 40);
+             if (step.continue) {
+                 JSON_Presenter.doStep(script);
+             }
         };
 
         // Compute a block size
@@ -229,9 +307,9 @@ const JSON_Presenter = {
             const endWidth = target.properties.blockWidth * w / 1000;
             const endHeight = target.properties.blockHeight * h / 1000;
             block.element.style[`width`] = 
-                `${width + Math.round((endWidth - width) * ratio)}px`;
+                `${width + (endWidth - width) * ratio}px`;
             block.element.style[`height`] = 
-                `${height + Math.round((endHeight - height) * ratio)}px`;
+                `${height + (endHeight - height) * ratio}px`;
         };
 
         // Compute a block position
@@ -244,9 +322,9 @@ const JSON_Presenter = {
             const endLeft = target.properties.blockLeft * w / 1000;
             const endTop = target.properties.blockTop * h / 1000;
             block.element.style[`left`] = 
-                left + Math.round((endLeft - left) * ratio);
+                left + (endLeft - left) * ratio;
             block.element.style[`top`] = 
-                top + Math.round((endTop - top) * ratio);
+                top + (endTop - top) * ratio;
         };
 
         // Compute a font size
@@ -260,8 +338,8 @@ const JSON_Presenter = {
 
         // Compute a font color
         const setComputedFontColor = (block, target, ratio) => {
-            const color = block.spec.fontColor;
-            const endColor = target.spec.fontColor;
+            const color = block.fontColor;
+            const endColor = target.fontColor;
             const rStart = parseInt(color.slice(1, 3), 16);
             const gStart = parseInt(color.slice(3, 5), 16);
             const bStart = parseInt(color.slice(5, 7), 16);
@@ -303,7 +381,7 @@ const JSON_Presenter = {
             var animStep = 0;
             const interval = setInterval(() => {
                 if (animStep < animSteps) {
-                    const ratio =  0.5 - Math.cos(parseFloat(animStep) / animSteps * 180 * 0.01745329) / 2;
+                    const ratio =  0.5 - Math.cos(Math.PI * animStep / animSteps) / 2;
                     const block = script.blocks[step.block];
                     const target = script.blocks[step.target];
                     if (Array.isArray(step.type)) {
@@ -316,15 +394,20 @@ const JSON_Presenter = {
                     animStep++;
                 } else {
                     clearInterval(interval);
-                    JSON_Presenter.doStep(script);
+                    if (!step.continue) {
+                        JSON_Presenter.doStep(script);
+                    }
                 }
              }, 40);
+             if (step.continue) {
+                JSON_Presenter.doStep(script);
+             }
         };
 
         // Process a single step
         while (JSON_Presenter.stepno < script.steps.length) {
             const step = script.steps[JSON_Presenter.stepno++];
-            console.log(step.action);
+            console.log(`Step ${JSON_Presenter.stepno}: ${step.action}`);
             switch (step.action) {
                 case `set content`:
                     doSetContent(script, step);
@@ -348,6 +431,9 @@ const JSON_Presenter = {
                     return;
                 case `fade down`:
                     doFade(script, step, false);
+                    return;
+                case `crossfade`:
+                    doCrossfade(script, step);
                     return;
                 case`transition`:
                     doTransition(script, step);
