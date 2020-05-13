@@ -67,8 +67,7 @@ const JSON_Presenter = {
             `blockTop`,
             `blockWidth`,
             `blockHeight`,
-            `blockBackground`,
-            `blockPadding`
+            `blockBackground`
         ];
 
         const script = JSON.parse(text);
@@ -147,13 +146,11 @@ const JSON_Presenter = {
             element.style[`background`] = properties.blockBackground;
             element.style[`border`] = properties.blockBorder;
             container.appendChild(element);
-            const paddingLeft = `${properties.blockPaddingLeft * w / 1000}px`;
-            const paddingTop = `${properties.blockPaddingTop * h / 1000}px`;
             const inner = document.createElement(`div`);
             inner.style[`position`] = `absolute`;
-            inner.style[`left`] = paddingLeft;
-            inner.style[`top`] = paddingTop;
-            inner.style[`width`] = `calc(100% - ${paddingLeft} - ${paddingLeft})`;
+            inner.style[`left`] = 0;
+            inner.style[`top`] = 0;
+            inner.style[`width`] = `100%`;
             element.appendChild(inner);
             element.inner = inner;
             const text = document.createElement(`div`);
@@ -186,6 +183,7 @@ const JSON_Presenter = {
             element.style[`height`] = `${properties.blockHeight * h / 1000}px`;
             element.style[`background`] = properties.blockBackground;
             element.style[`border`] = properties.blockBorder;
+            element.style[`border-radius`] = properties.blockBorderRadius;
             container.appendChild(element);
         };
 
@@ -269,7 +267,6 @@ const JSON_Presenter = {
         // Handle a crossfade
         const doCrossfade = (script, step) => {
             const block = script.blocks[step.block];
-            const properties = block.properties;
             const content = script.content[step.target];
             let element;
             let newText;
@@ -278,28 +275,27 @@ const JSON_Presenter = {
                     element = document.createElement(`div`);
                     element.style[`position`] = `absolute`;
                     element.style[`opacity`] = `0.0`;
-                    element.style[`left`] = properties.blockLeft * w / 1000;
-                    element.style[`top`] = properties.blockTop * h / 1000;
-                    element.style[`width`] = `${properties.blockWidth * w / 1000}px`;
-                    element.style[`height`] = `${properties.blockHeight * h / 1000}px`;
-                    element.style[`background`] = properties.blockBackground;
-                    element.style[`border`] = properties.blockBorder;
+                    element.style[`left`] = block.element.style[`left`];
+                    element.style[`top`] = block.element.style[`top`];
+                    element.style[`width`] = block.element.style[`width`];
+                    element.style[`height`] = block.element.style[`height`];
+                    element.style[`background`] = block.element.style[`background`]
+                    element.style[`border`] = block.element.style[`border`]
+                    element.style[`border-radius`] = block.element.style[`border-radius`]
                     block.container.appendChild(element);
-                    const paddingLeft = `${properties.blockPaddingLeft * w / 1000}px`;
-                    const paddingTop = `${properties.blockPaddingTop * h / 1000}px`;
                     const inner = document.createElement(`div`);
                     inner.style[`position`] = `absolute`;
-                    inner.style[`left`] = paddingLeft;
-                    inner.style[`top`] = paddingTop;
-                    inner.style[`width`] = `calc(100% - ${paddingLeft} - ${paddingLeft})`;
+                    inner.style[`left`] = 0;
+                    inner.style[`top`] = 0;
+                    inner.style[`width`] = `100%`;
                     element.appendChild(inner);
                     const text = document.createElement(`div`);
-                    text.style[`font-family`] = properties.fontFamily;
-                    text.style[`font-size`] = `${properties.fontSize * h / 1000}px`;
-                    text.style[`font-weight`] = properties.fontWeight;
-                    text.style[`font-style`] = properties.fontStyle;
-                    text.style[`color`] = properties.fontColor;
-                    text.style[`text-align`] = properties.textAlign;
+                    text.style[`font-family`] = block.element.inner.text.style[`font-family`];
+                    text.style[`font-size`] = block.element.inner.text.style[`font-size`];
+                    text.style[`font-weight`] = block.element.inner.text.style[`font-weight`];
+                    text.style[`font-style`] = block.element.inner.text.style[`font-style`];
+                    text.style[`color`] = block.element.inner.text.style[`color`];
+                    text.style[`text-align`] = block.element.inner.text.style[`text-align`];
                     inner.appendChild(text);
                     newText = content.content;
                     if (Array.isArray(newText)) {
@@ -310,15 +306,15 @@ const JSON_Presenter = {
                     break;
                 case `image`:
                     element = document.createElement(`div`);
-                    element.id = `crossfade2-image`;
                     element.style[`position`] = `absolute`;
                     element.style[`opacity`] = `0.0`;
-                    element.style[`left`] = properties.blockLeft * w / 1000;
-                    element.style[`top`] = properties.blockTop * h / 1000;
-                    element.style[`width`] = `${properties.blockWidth * w / 1000}px`;
-                    element.style[`height`] = `${properties.blockHeight * h / 1000}px`;
-                    element.style[`background`] = properties.blockBackground;
-                    element.style[`border`] = properties.blockBorder;
+                    element.style[`left`] = block.element.style[`left`];
+                    element.style[`top`] = block.element.style[`top`];
+                    element.style[`width`] = block.element.style[`width`];
+                    element.style[`height`] = block.element.style[`height`];
+                    element.style[`background`] = block.element.style[`background`];
+                    element.style[`border`] = block.element.style[`border`];
+                    element.style[`border-radius`] = block.element.style[`border-radius`];
                     block.container.appendChild(element);
                     element.style[`background`] = `url("${content.url}")`;
                     element.style[`background-size`] = `cover`;
