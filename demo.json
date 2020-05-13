@@ -48,12 +48,19 @@
             "fontColor": "#dddddd"
         },
         "body right": {
-            "blockLeft": 550,
+            "blockLeft": 500,
             "blockTop": 200,
-            "blockWidth": 370,
+            "blockWidth": 420,
             "blockHeight": 800,
             "fontFamily": "Helvetica,sans-serif",
             "fontColor": "#dddddd"
+        },
+        "left image": {
+            "blockLeft": 80,
+            "blockTop": 200,
+            "blockWidth": 370,
+            "blockHeight": 700,
+            "blockBackground": "yellow"
         }
     },
     "content":  {
@@ -82,13 +89,17 @@
     },
     "steps": [
         {
+            "speed": "normal"
+        },
+        {
             "comment": "-------------------- Create the title and body blocks"
         },
         {
             "action": "create",
             "blocks": [
                 "title",
-                "body"
+                "body",
+                "left image"
             ]
         },
         {
@@ -187,6 +198,9 @@
             "comment": "-------------------------- Move the body to the right"
         },
         {
+            "speed": "normal"
+        },
+        {
             "action": "transition",
             "type": [
                 "block position",
@@ -195,6 +209,14 @@
             "block": "body",
             "target": "body right",
             "duration": 1
+        },
+        {
+            "comment": "------------------------------------- Wait 10 seconds"
+        },
+        {
+            "action": "fade up",
+            "blocks": "left image",
+            "duration": 2
         },
         {
             "comment": "------------------------------------- Wait 10 seconds"
@@ -210,7 +232,8 @@
             "action": "fade down",
             "blocks": [
                 "title",
-                "body"
+                "body",
+                "left image"
             ],
             "duration": 3
         }

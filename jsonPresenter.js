@@ -84,6 +84,7 @@ const JSON_Presenter = {
         container.style[`background-size`] = `cover`;
         JSON_Presenter.initBlocks(container, script.blocks, script.defaults);
         JSON_Presenter.sequence = 1;
+        JSON_Presenter.speed = `normal`;
         JSON_Presenter.doStep(script);
     },
 
@@ -223,7 +224,7 @@ const JSON_Presenter = {
                         JSON_Presenter.doStep(script);
                     }
                 }
-             }, 40);
+             }, JSON_Presenter.speed === `normal` ? 40 : 0);
              if (step.continue) {
                  JSON_Presenter.doStep(script);
              }
@@ -296,7 +297,7 @@ const JSON_Presenter = {
                         JSON_Presenter.doStep(script);
                     }
                 }
-             }, 40);
+             }, JSON_Presenter.speed === `normal` ? 40 : 0);
              if (step.continue) {
                  JSON_Presenter.doStep(script);
              }
@@ -403,7 +404,7 @@ const JSON_Presenter = {
                         JSON_Presenter.doStep(script);
                     }
                 }
-             }, 40);
+             }, JSON_Presenter.speed === `normal` ? 40 : 0);
              if (step.continue) {
                 JSON_Presenter.doStep(script);
              }
@@ -412,7 +413,12 @@ const JSON_Presenter = {
         // Process a single step
         while (JSON_Presenter.stepno < script.steps.length) {
             let step = script.steps[JSON_Presenter.stepno++];
-            while (step.comment) {
+            while (!step.action) {
+                if (step.comment) {}
+                else if (step.speed) {
+                    JSON_Presenter.speed = step.speed;
+                }
+                else throw Error(`Unknown syntax: '${JSON.stringify(step, 0, 2)}'`);
                 step = script.steps[JSON_Presenter.stepno++];
             }
             console.log(`Step ${JSON_Presenter.sequence++}: ${step.action}`);
@@ -432,7 +438,7 @@ const JSON_Presenter = {
                 case `hold`:
                     setTimeout(() => {
                         JSON_Presenter.doStep(script);
-                    }, step.duration * 1000);
+                    }, JSON_Presenter.speed === `normal` ? step.duration * 1000 : 0);
                     return;
                 case `fade up`:
                     doFade(script, step, true);
