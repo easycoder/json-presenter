@@ -59,8 +59,13 @@
             "blockLeft": 80,
             "blockTop": 200,
             "blockWidth": 370,
-            "blockHeight": 700,
-            "blockBackground": "yellow"
+            "blockHeight": 700
+        },
+        "left image 2": {
+            "blockLeft": 80,
+            "blockTop": 200,
+            "blockWidth": 370,
+            "blockHeight": 700
         }
     },
     "content":  {
@@ -71,25 +76,33 @@
         "slide 1": {
             "type": "text",
             "content": [
-                "JSON::Presenter<sup>&copy;</sup> is a presentation format using JSON scripts, and an engine that runs those scripts in a browser to create presentations. These may be similar to those created using PowerPoint or they can be considerably more elaborate, with extensive animation and even sound. In some cases they can take the place of video yet still offer a dynamic experience.",
+                "JSON::Presenter is a presentation format using JSON scripts, and an engine that runs those scripts in a browser to create presentations. These may be similar to those created using PowerPoint or they can be considerably more elaborate, with extensive animation and even sound. In some cases they can take the place of video yet still offer a dynamic experience.",
                 
                 "Presentations can run from any host, including static; all you need is one CDN-hosted JavaScript file and you're good to go.",
                 
-                "The JSON::Presenter<sup>&copy;</sup> engine is pure JavaScript. It can be used with any JavaScript framework, or with none."
+                "The JSON::Presenter engine is pure JavaScript. It can be used with any JavaScript framework, or with none."
             ]
         },
         "slide 2": {
             "type": "text",
             "content": [
-                "JSON::Presenter<sup>&copy;</sup> offers a range of block types and transitions that make it easy to create slick, effective presentations.",
+                "JSON::Presenter offers a range of block types and transitions that make it easy to create slick, effective presentations.",
                 
                 "This demo illustrates some of the capabilities of the system."
             ]
+        },
+        "flowers": {
+            "type": "image",
+            "url": "img/flowers.jpg"
+        },
+        "moon": {
+            "type": "image",
+            "url": "img/moon.jpg"
         }
     },
     "steps": [
         {
-            "speed": "normal"
+            "speed": "scan"
         },
         {
             "comment": "---------------------------------- Set up the content"
@@ -104,6 +117,10 @@
                 {
                     "block": "body",
                     "content": "slide 1"
+                },
+                {
+                    "block": "left image",
+                    "content": "flowers"
                 }
             ]
         },
@@ -187,9 +204,6 @@
             "comment": "-------------------------- Move the body to the right"
         },
         {
-            "speed": "normal"
-        },
-        {
             "action": "transition",
             "type": [
                 "block position",
@@ -200,12 +214,31 @@
             "duration": 1
         },
         {
-            "comment": "------------------------------------- Wait 10 seconds"
+            "comment": "----------------------------- Fade up the image block"
         },
         {
             "action": "fade up",
             "blocks": "left image",
             "duration": 2
+        },
+        {
+            "speed": "normal"
+        },
+        {
+            "comment": "------------------------------------- Wait 10 seconds"
+        },
+        {
+            "action": "hold",
+            "duration": 10
+        },
+        {
+            "comment": "--------------------------------- Crossfade the image"
+        },
+        {
+            "action": "crossfade",
+            "block": "left image",
+            "target": "moon",
+            "duration": 1
         },
         {
             "comment": "------------------------------------- Wait 10 seconds"

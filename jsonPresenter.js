@@ -83,6 +83,7 @@ const JSON_Presenter = {
         } 
         container.style[`background-size`] = `cover`;
         JSON_Presenter.initBlocks(container, script.blocks, script.defaults);
+        JSON_Presenter.preloadImages(container, script.content);
         JSON_Presenter.sequence = 1;
         JSON_Presenter.speed = `normal`;
         JSON_Presenter.doStep(script);
@@ -113,11 +114,21 @@ const JSON_Presenter = {
         }
     },
 
+    // Preload all the images
+    preloadImages: (container, content) => {
+        for (const item in content) {
+            if (item.type == `image`) {
+                item.img = document.createElement(`div`);
+                item.img.style[`background`] = `url("${item.url}")`;
+            }
+        }
+    },
+
     // Handle a step
     doStep: (script) => {
 
-        // Create  block.
-        const createElement = (block) => {
+        // Create a text block.
+        const createTextBlock = (block) => {
             const container = block.container;
             if (block.element) {
                 container.removeChild(block.element);
@@ -156,10 +167,35 @@ const JSON_Presenter = {
             inner.text = text;
         };
 
+        // Create an image block.
+        const createImageBlock = (block) => {
+            const container = block.container;
+            if (block.element) {
+                container.removeChild(block.element);
+            }
+            w = Math.round(container.getBoundingClientRect().width);
+            h = Math.round(container.getBoundingClientRect().height);
+            const properties = block.properties;
+            const element = document.createElement(`div`);
+            block.element = element;
+            element.style[`position`] = `absolute`;
+            element.style[`opacity`] = `0.0`;
+            element.style[`left`] = properties.blockLeft * w / 1000;
+            element.style[`top`] = properties.blockTop * h / 1000;
+            element.style[`width`] = `${properties.blockWidth * w / 1000}px`;
+            element.style[`height`] = `${properties.blockHeight * h / 1000}px`;
+            element.style[`background`] = properties.blockBackground;
+            element.style[`border`] = properties.blockBorder;
+            container.appendChild(element);
+        };
+
         // Set the content of blocks
         const doSetContent = (script, step) => {
             for (const item of step.blocks) {
                 const block = script.blocks[item.block];
+                if (!block) {
+                    throw Error(`Block '${item.block}' cannot be found`);
+                }
                 const spec = script.content[item.content];
                 switch (spec.type) {
                     case `text`:
@@ -168,11 +204,16 @@ const JSON_Presenter = {
                             content = content.join(`<br><br>`);
                         }
                         if (!block.element) {
-                            createElement(block);
+                            createTextBlock(block);
                         }
                         block.element.inner.text.innerHTML = content.split(`\n`).join(`<br>`);
                     break;
                     case `image`:
+                        if (!block.element) {
+                            createImageBlock(block);
+                        }
+                        block.element.style[`background`] = `url("${spec.url}")`;
+                        block.element.style[`background-size`] = `cover`;
                         break;
                 }
             }
@@ -207,7 +248,8 @@ const JSON_Presenter = {
                     } else {
                         const block = script.blocks[step.blocks];
                         if (!block.element) {
-                            createElement(block);
+                            clearInterval(interval);
+                            throw Error(`I can't fade up a block with no content`);
                         }
                         block.element.style[`opacity`] = upDown ? ratio : 1.0 - ratio;
                     }
@@ -228,16 +270,12 @@ const JSON_Presenter = {
         const doCrossfade = (script, step) => {
             const block = script.blocks[step.block];
             const properties = block.properties;
-            const target = {};
             const content = script.content[step.target];
-            let newText = content.content;
-            if (Array.isArray(newText)) {
-                newText = newText.join(`<br><br>`);
-            }
-            newText = newText.split(`\n`).join(`<br>`);
+            let element;
+            let newText;
             switch (content.type) {
                 case `text`:
-                    const element = document.createElement(`div`);
+                    element = document.createElement(`div`);
                     element.style[`position`] = `absolute`;
                     element.style[`opacity`] = `0.0`;
                     element.style[`left`] = properties.blockLeft * w / 1000;
@@ -247,7 +285,6 @@ const JSON_Presenter = {
                     element.style[`background`] = properties.blockBackground;
                     element.style[`border`] = properties.blockBorder;
                     block.container.appendChild(element);
-                    target.element = element;
                     const paddingLeft = `${properties.blockPaddingLeft * w / 1000}px`;
                     const paddingTop = `${properties.blockPaddingTop * h / 1000}px`;
                     const inner = document.createElement(`div`);
@@ -264,7 +301,27 @@ const JSON_Presenter = {
                     text.style[`color`] = properties.fontColor;
                     text.style[`text-align`] = properties.textAlign;
                     inner.appendChild(text);
+                    newText = content.content;
+                    if (Array.isArray(newText)) {
+                        newText = newText.join(`<br><br>`);
+                    }
+                    newText = newText.split(`\n`).join(`<br>`);
                     text.innerHTML = newText;
+                    break;
+                case `image`:
+                    element = document.createElement(`div`);
+                    element.id = `crossfade2-image`;
+                    element.style[`position`] = `absolute`;
+                    element.style[`opacity`] = `0.0`;
+                    element.style[`left`] = properties.blockLeft * w / 1000;
+                    element.style[`top`] = properties.blockTop * h / 1000;
+                    element.style[`width`] = `${properties.blockWidth * w / 1000}px`;
+                    element.style[`height`] = `${properties.blockHeight * h / 1000}px`;
+                    element.style[`background`] = properties.blockBackground;
+                    element.style[`border`] = properties.blockBorder;
+                    block.container.appendChild(element);
+                    element.style[`background`] = `url("${content.url}")`;
+                    element.style[`background-size`] = `cover`;
                     break;
                 default:
                     throw Error(`Unknown content type: '${content.type}'`);
@@ -276,22 +333,26 @@ const JSON_Presenter = {
                 if (animStep < animSteps) {
                     const ratio =  0.5 - Math.cos(Math.PI * animStep / animSteps) / 2;
                     block.element.style[`opacity`] = 1.0 - ratio;
-                    target.element.style[`opacity`] = ratio;
+                    element.style[`opacity`] = ratio;
                     animStep++;
                 } else {
                     clearInterval(interval);
                     switch (content.type) {
                         case `text`:
                             block.element.inner.text.innerHTML = newText;
-                            block.element.style[`opacity`] = 1.0 ;
-                            block.container.removeChild(target.element);
+                            break;
+                        case `image`:
+                            block.element.style[`background`] = `url("${content.url}")`;
+                            block.element.style[`background-size`] = `cover`;
                             break;
                     }
+                    block.element.style[`opacity`] = 1.0 ;
+                    element.parentNode.removeChild(element);
                     if (!step.continue) {
                         JSON_Presenter.doStep(script);
                     }
                 }
-             }, JSON_Presenter.speed === `normal` ? 40 : 0);
+             }, JSON_Presenter.speed === `normal` ? 80 : 0);
              if (step.continue) {
                  JSON_Presenter.doStep(script);
              }
