@@ -19,7 +19,7 @@
         "blockWidth": 1000,
         "blockBackground" : "none",
         "blockBorder": "none",
-        "blockPaddingLeft": 20,
+        "blockPaddingLeft": 0,
         "blockPaddingTop": 0
     },
     "blocks": {
@@ -40,10 +40,18 @@
             "fontColor": "#dddd00"
         },
         "body": {
-            "blockTop": 200,
+            "blockLeft": 80,
+            "blockTop": 240,
+            "blockWidth": 840,
             "blockHeight": 800,
-            "blockPaddingLeft": 80,
-            "blockPaddingTop": 40,
+            "fontFamily": "Helvetica,sans-serif",
+            "fontColor": "#dddddd"
+        },
+        "body right": {
+            "blockLeft": 550,
+            "blockTop": 200,
+            "blockWidth": 370,
+            "blockHeight": 800,
             "fontFamily": "Helvetica,sans-serif",
             "fontColor": "#dddddd"
         }
@@ -74,7 +82,9 @@
     },
     "steps": [
         {
-            "comment": "-------------------- Create the title and body blocks",
+            "comment": "-------------------- Create the title and body blocks"
+        },
+        {
             "action": "create",
             "blocks": [
                 "title",
@@ -82,7 +92,9 @@
             ]
         },
         {
-            "comment": "---------------------------------- Set up the content",
+            "comment": "---------------------------------- Set up the content"
+        },
+        {
             "action": "set content",
             "blocks": [
                 {
@@ -96,23 +108,31 @@
             ]
         },
         {
-            "comment": "------------------------------- Pause before we start",
+            "comment": "------------------------------- Pause before we start"
+        },
+        {
             "action": "hold",
             "duration": 2
         },
         {
-            "comment": "----------------------------- Fade up the intro title",
+            "comment": "----------------------------- Fade up the intro title"
+        },
+        {
             "action": "fade up",
             "blocks": "title",
             "duration": 3
         },
         {
-            "comment": "-------------------------------------- Wait 4 seconds",
+            "comment": "-------------------------------------- Wait 4 seconds"
+        },
+        {
             "action": "hold",
             "duration": 4
         },
         {
-            "comment": "-------------------------------- Transition the title",
+            "comment": "-------------------------------- Transition the title"
+        },
+        {
             "action": "transition",
             "type": [
                 "block position",
@@ -126,35 +146,67 @@
             "continue": true
         },
         {
-            "comment": "----------------------------- Pause for half a second",
+            "comment": "----------------------------- Pause for half a second"
+        },
+        {
             "action": "hold",
             "duration": 0.5
         },
         {
-            "comment": "-------------------------------- Show the first slide",
+            "comment": "-------------------------------- Show the first slide"
+        },
+        {
             "action": "fade up",
             "blocks": "body",
             "duration": 1
         },
         {
-            "comment": "------------------------------------- Wait 10 seconds",
+            "comment": "------------------------------------- Wait 10 seconds"
+        },
+        {
             "action": "hold",
             "duration": 10
         },
         {
-            "comment": "----------------------------- Crossfade the body text",
+            "comment": "----------------------------- Crossfade the body text"
+        },
+        {
             "action": "crossfade",
             "block": "body",
             "target": "slide 2",
             "duration": 1
         },
         {
-            "comment": "------------------------------------- Wait 10 seconds",
+            "comment": "------------------------------------- Wait 5 seconds"
+        },
+        {
+            "action": "hold",
+            "duration": 5
+        },
+        {
+            "comment": "-------------------------- Move the body to the right"
+        },
+        {
+            "action": "transition",
+            "type": [
+                "block position",
+                "block size"
+            ],
+            "block": "body",
+            "target": "body right",
+            "duration": 1
+        },
+        {
+            "comment": "------------------------------------- Wait 10 seconds"
+        },
+        {
             "action": "hold",
             "duration": 10
         },
         {
-            "comment": "------------------------ Fade down the title and body",
+            "comment": "------------------------ Fade down the title and body"
+        },
+        {
             "action": "fade down",
             "blocks": [
                 "title",

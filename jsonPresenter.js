@@ -76,12 +76,14 @@ const JSON_Presenter = {
         const height = Math.round(parseFloat(container.offsetWidth) * script.aspectH / script.aspectW);
         container.style[`height`] = `${Math.round(height)}px`;
         container.style[`position`] = `relative`;
+        container.style[`overflow`] = `hidden`;
         script.element = container;
         for (const item of containerStyles) {
             JSON_Presenter.doStyle(container, script.container, item);
         } 
         container.style[`background-size`] = `cover`;
-        JSON_Presenter.doBlocks(container, script.blocks, script.defaults);
+        JSON_Presenter.initBlocks(container, script.blocks, script.defaults);
+        JSON_Presenter.sequence = 1;
         JSON_Presenter.doStep(script);
     },
 
@@ -92,8 +94,8 @@ const JSON_Presenter = {
         }
     },
 
-    // Create all the blocks
-    doBlocks: (container, blocks, defaults) => {
+    // Initialize all the blocks
+    initBlocks: (container, blocks, defaults) => {
         for (const name in blocks) {
             const block = blocks[name];
             const properties = {};
@@ -113,9 +115,12 @@ const JSON_Presenter = {
     // Handle a step
     doStep: (script) => {
 
-        // Create an element.
+        // Create  block.
         const createElement = (block) => {
             const container = block.container;
+            if (block.element) {
+                container.removeChild(block.element);
+            }
             w = Math.round(container.getBoundingClientRect().width);
             h = Math.round(container.getBoundingClientRect().height);
             const properties = block.properties;
@@ -389,7 +394,7 @@ const JSON_Presenter = {
                             doTransitionStep(type, block, target, ratio);
                         }
                     } else {
-                        doTransitionStep(type, block, target, ratio);
+                        doTransitionStep(step.type, block, target, ratio);
                     }
                     animStep++;
                 } else {
@@ -406,8 +411,11 @@ const JSON_Presenter = {
 
         // Process a single step
         while (JSON_Presenter.stepno < script.steps.length) {
-            const step = script.steps[JSON_Presenter.stepno++];
-            console.log(`Step ${JSON_Presenter.stepno}: ${step.action}`);
+            let step = script.steps[JSON_Presenter.stepno++];
+            while (step.comment) {
+                step = script.steps[JSON_Presenter.stepno++];
+            }
+            console.log(`Step ${JSON_Presenter.sequence++}: ${step.action}`);
             switch (step.action) {
                 case `set content`:
                     doSetContent(script, step);
