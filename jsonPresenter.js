@@ -199,7 +199,7 @@ const JSON_Presenter = {
             var animStep = 0;
             const interval = setInterval(() => {
                 if (animStep < animSteps) {
-                    const ratio = parseFloat(animStep) / animSteps;
+                    const ratio =  0.5 - Math.cos(parseFloat(animStep) / animSteps * 180 * 0.01745329) / 2;
                     if (Array.isArray(step.blocks)) {
                         let blocks = step.blocks.length;
                         for (const block of step.blocks)
@@ -303,7 +303,7 @@ const JSON_Presenter = {
             var animStep = 0;
             const interval = setInterval(() => {
                 if (animStep < animSteps) {
-                    const ratio = parseFloat(animStep) / animSteps;
+                    const ratio =  0.5 - Math.cos(parseFloat(animStep) / animSteps * 180 * 0.01745329) / 2;
                     const block = script.blocks[step.block];
                     const target = script.blocks[step.target];
                     if (Array.isArray(step.type)) {
