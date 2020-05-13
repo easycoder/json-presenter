@@ -167,23 +167,14 @@ const JSON_Presenter = {
                         if (Array.isArray(content)) {
                             content = content.join(`<br><br>`);
                         }
+                        if (!block.element) {
+                            createElement(block);
+                        }
                         block.element.inner.text.innerHTML = content.split(`\n`).join(`<br>`);
                     break;
                     case `image`:
                         break;
                 }
-            }
-        };
-        
-        // Create an element
-        const doCreate = (script, step) => {
-            if (Array.isArray(step.blocks)) {
-                for (const block of step.blocks)
-                {
-                    createElement(script.blocks[block]);
-                }
-            } else {
-                createElement(script.blocks[step.blocks]);
             }
         };
 
@@ -214,8 +205,11 @@ const JSON_Presenter = {
                             element.style[`opacity`] = upDown ? ratio : 1.0 - ratio;
                         }
                     } else {
-                        const element = script.blocks[step.blocks].element;
-                        element.style[`opacity`] = upDown ? ratio : 1.0 - ratio;
+                        const block = script.blocks[step.blocks];
+                        if (!block.element) {
+                            createElement(block);
+                        }
+                        block.element.style[`opacity`] = upDown ? ratio : 1.0 - ratio;
                     }
                     animStep++;
                 } else {
@@ -425,9 +419,6 @@ const JSON_Presenter = {
             switch (step.action) {
                 case `set content`:
                     doSetContent(script, step);
-                    break;
-                case `create`:
-                    doCreate(script, step);
                     break;
                 case `show`:
                     doShowHide(script, step, true);

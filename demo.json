@@ -92,17 +92,6 @@
             "speed": "normal"
         },
         {
-            "comment": "-------------------- Create the title and body blocks"
-        },
-        {
-            "action": "create",
-            "blocks": [
-                "title",
-                "body",
-                "left image"
-            ]
-        },
-        {
             "comment": "---------------------------------- Set up the content"
         },
         {
