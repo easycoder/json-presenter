@@ -14,10 +14,12 @@
         "fontStyle": "normal",
         "fontColor": "white",
         "textAlign": "left",
-        "blockLeft" : 0,
-        "blockTop" : 0,
+        "textMarginLeft": 0,
+        "textMarginTop": 0,
+        "blockLeft": 0,
+        "blockTop": 0,
         "blockWidth": 1000,
-        "blockBackground" : "none",
+        "blockBackground": "none",
         "blockBorder": "none",
         "blockBorderRadius": 0
     },
@@ -83,7 +85,7 @@
             "content": [
                 "JSON::Presenter offers a range of block types and transitions that make it easy to create slick, effective presentations.",
                 
-                "This demo illustrates some of the capabilities of the system."
+                "This demo illustrates some of the features of the system."
             ]
         },
         "slide 3": {
@@ -110,9 +112,7 @@
             "speed": "normal"
         },
         {
-            "comment": "---------------------------------- Set up the content"
-        },
-        {
+            "comment": "---------------------------------- Set up the content",
             "action": "set content",
             "blocks": [
                 {
@@ -130,31 +130,23 @@
             ]
         },
         {
-            "comment": "------------------------------- Pause before we start"
-        },
-        {
+            "comment": "------------------------------- Pause before we start",
             "action": "hold",
             "duration": 2
         },
         {
-            "comment": "----------------------------- Fade up the intro title"
-        },
-        {
+            "comment": "----------------------------- Fade up the intro title",
             "action": "fade up",
             "blocks": "title",
             "duration": 3
         },
         {
-            "comment": "-------------------------------------- Wait 4 seconds"
-        },
-        {
+            "comment": "-------------------------------------- Wait 4 seconds",
             "action": "hold",
             "duration": 4
         },
         {
-            "comment": "-------------------------------- Transition the title"
-        },
-        {
+            "comment": "-------------------------------- Transition the title",
             "action": "transition",
             "type": [
                 "block position",
@@ -168,47 +160,35 @@
             "continue": true
         },
         {
-            "comment": "----------------------------- Pause for half a second"
-        },
-        {
+            "comment": "----------------------------- Pause for half a second",
             "action": "hold",
             "duration": 0.5
         },
         {
-            "comment": "-------------------------------- Show the first slide"
-        },
-        {
+            "comment": "-------------------------------- Show the first slide",
             "action": "fade up",
             "blocks": "body",
             "duration": 1
         },
         {
-            "comment": "------------------------------------- Wait 10 seconds"
-        },
-        {
+            "comment": "------------------------------------- Wait 10 seconds",
             "action": "hold",
             "duration": 10
         },
         {
-            "comment": "----------------------------- Crossfade the body text"
-        },
-        {
+            "comment": "-------------------------------- Change the body text",
             "action": "crossfade",
             "block": "body",
             "target": "slide 2",
             "duration": 1
         },
         {
-            "comment": "------------------------------------- Wait 5 seconds"
-        },
-        {
+            "comment": "------------------------------------- Wait 5 seconds",
             "action": "hold",
             "duration": 5
         },
         {
-            "comment": "-------------------------- Move the body to the right"
-        },
-        {
+            "comment": "-------------------------- Move the body to the right",
             "action": "transition",
             "type": [
                 "block position",
@@ -219,9 +199,7 @@
             "duration": 1
         },
         {
-            "comment": "----------------------------- Fade up the image block"
-        },
-        {
+            "comment": "----------------------------- Fade up the image block",
             "action": "fade up",
             "blocks": "left image",
             "duration": 2
@@ -230,48 +208,35 @@
             "speed": "normal"
         },
         {
-            "comment": "-------------------------------------- Wait 8 seconds"
-        },
-        {
+            "comment": "-------------------------------------- Wait 8 seconds",
             "action": "hold",
             "duration": 8
         },
         {
-            "comment": "--------------------------------- Crossfade the image"
-        },
-        {
+            "comment": "--------------------------------- Crossfade the image",
             "action": "crossfade",
             "block": "left image",
             "target": "moon",
             "duration": 1
         },
         {
-            "comment": "-------------------------------------- Wait 2 seconds"
-        },
-        {
+            "comment": "-------------------------------------- Wait 2 seconds",
             "action": "hold",
             "duration": 2
         },
         {
-            "comment": "----------------------------- Crossfade the body text"
-        },
-        {
-            "action": "crossfade",
+            "comment": "-------------------------------- Change the body text",
+            "action": "set content",
             "block": "body",
-            "target": "slide 3",
-            "duration": 1
+            "content": "slide 3"
         },
         {
-            "comment": "------------------------------------- Wait 10 seconds"
-        },
-        {
+            "comment": "------------------------------------- Wait 10 seconds",
             "action": "hold",
             "duration": 10
         },
         {
-            "comment": "------------------------ Fade down the title and body"
-        },
-        {
+            "comment": "------------------------ Fade down the title and body",
             "action": "fade down",
             "blocks": [
                 "title",

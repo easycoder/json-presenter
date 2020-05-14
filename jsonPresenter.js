@@ -28,7 +28,7 @@ window.onload = () => {
     const container = document.getElementById(`jp-container`);
 
     const scriptElement = document.getElementById(`jp-script`);
-    const request = createCORSRequest(scriptElement.innerText);
+    const request = createCORSRequest(`${scriptElement.innerText}?v=${Math.floor(Date.now() / 1000)}`);
     if (!request) {
         throw Error(`Unable to access the JSON script`);
     }
@@ -146,11 +146,13 @@ const JSON_Presenter = {
             element.style[`background`] = properties.blockBackground;
             element.style[`border`] = properties.blockBorder;
             container.appendChild(element);
+            const marginLeft = properties.textMarginLeft * w / 1000;
+            const marginTop = properties.textMarginTop * h / 1000;
             const inner = document.createElement(`div`);
             inner.style[`position`] = `absolute`;
-            inner.style[`left`] = 0;
-            inner.style[`top`] = 0;
-            inner.style[`width`] = `100%`;
+            inner.style[`left`] = marginLeft;
+            inner.style[`top`] = marginTop;
+            inner.style[`width`] = `calc(100% - ${marginLeft}px - ${marginLeft}px)`;
             element.appendChild(inner);
             element.inner = inner;
             const text = document.createElement(`div`);
@@ -187,37 +189,47 @@ const JSON_Presenter = {
             container.appendChild(element);
         };
 
-        // Set the content of blocks
-        const doSetContent = (script, step) => {
-            for (const item of step.blocks) {
-                const block = script.blocks[item.block];
-                if (!block) {
-                    throw Error(`Block '${item.block}' cannot be found`);
-                }
-                const spec = script.content[item.content];
-                switch (spec.type) {
-                    case `text`:
-                        let content = spec.content;
-                        if (Array.isArray(content)) {
-                            content = content.join(`<br><br>`);
-                        }
-                        if (!block.element) {
-                            createTextBlock(block);
-                        }
-                        block.element.inner.text.innerHTML = content.split(`\n`).join(`<br>`);
+        // Set the content of a block
+        const setContent = (script, spec) => {
+            const block = script.blocks[spec.block];
+            const contentSpec = script.content[spec.content];
+            if (!block) {
+                throw Error(`Block '${block}' cannot be found`);
+            }
+            switch (contentSpec.type) {
+                case `text`:
+                    if (!block.element) {
+                        createTextBlock(block);
+                    }
+                    let content = contentSpec.content;
+                    if (Array.isArray(content)) {
+                        content = content.join(`<br><br>`);
+                    }
+                    block.element.inner.text.innerHTML = content.split(`\n`).join(`<br>`);
+                break;
+                case `image`:
+                    if (!block.element) {
+                        createImageBlock(block);
+                    }
+                    block.element.style[`background`] = `url("${contentSpec.url}")`;
+                    block.element.style[`background-size`] = `cover`;
                     break;
-                    case `image`:
-                        if (!block.element) {
-                            createImageBlock(block);
-                        }
-                        block.element.style[`background`] = `url("${spec.url}")`;
-                        block.element.style[`background-size`] = `cover`;
-                        break;
-                }
             }
         };
 
-        // Show or hide an element
+        // Set the content of a block
+        const doSetContent = (script, step) => {
+            if (step.blocks) {
+                for (const spec of step.blocks)
+                {
+                    setContent(script, spec);
+                }
+            } else {
+                setContent(script, step);
+            }
+        };
+
+        // Show or hide a block
         const doShowHide = (script, step, showHide) => {
             if (Array.isArray(step.blocks)) {
                 for (const block of step.blocks)
@@ -285,9 +297,9 @@ const JSON_Presenter = {
                     block.container.appendChild(element);
                     const inner = document.createElement(`div`);
                     inner.style[`position`] = `absolute`;
-                    inner.style[`left`] = 0;
-                    inner.style[`top`] = 0;
-                    inner.style[`width`] = `100%`;
+                    inner.style[`left`] = block.element.inner.style[`left`];
+                    inner.style[`top`] = block.element.inner.style[`top`];
+                    inner.style[`width`] = block.element.inner.style[`width`];
                     element.appendChild(inner);
                     const text = document.createElement(`div`);
                     text.style[`font-family`] = block.element.inner.text.style[`font-family`];
@@ -465,14 +477,17 @@ const JSON_Presenter = {
         while (JSON_Presenter.stepno < script.steps.length) {
             let step = script.steps[JSON_Presenter.stepno++];
             while (!step.action) {
-                if (step.comment) {}
-                else if (step.speed) {
+                if (step.speed) {
                     JSON_Presenter.speed = step.speed;
                 }
                 else throw Error(`Unknown syntax: '${JSON.stringify(step, 0, 2)}'`);
                 step = script.steps[JSON_Presenter.stepno++];
             }
-            console.log(`Step ${JSON_Presenter.sequence++}: ${step.action}`);
+            if (step.comment) {
+                console.log(`Step ${JSON_Presenter.sequence++}: ${step.comment}`);
+            } else {
+                console.log(`Step ${JSON_Presenter.sequence++}: ${step.action}`);
+            }
             switch (step.action) {
                 case `set content`:
                     doSetContent(script, step);
@@ -504,6 +519,6 @@ const JSON_Presenter = {
                     throw Error(`Unknown action: '${step.action}'`);
             }
         }
-        console.log(`finished`);
+        console.log(`Step ${JSON_Presenter.sequence}: Finished`);
     }
 };
