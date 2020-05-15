@@ -23,34 +23,32 @@ window.onload = () => {
     
         }
         return xhr;
-    };	
-    
-    const container = document.getElementById(`jp-container`);
+    };
 
     const scriptElement = document.getElementById(`jp-script`);
-    const request = createCORSRequest(`${scriptElement.innerText}?v=${Math.floor(Date.now() / 1000)}`);
-    if (!request) {
-        throw Error(`Unable to access the JSON script`);
-    }
-
-    request.onload = () => {
-        if (200 <= request.status && request.status < 400) {
-            JSON_Presenter.present(container, request.responseText);
-     } else {
+    if (scriptElement) {
+        const request = createCORSRequest(`${scriptElement.innerText}?v=${Math.floor(Date.now())}`);
+        if (!request) {
             throw Error(`Unable to access the JSON script`);
         }
-    };
 
-    request.onerror = () => {
-        throw Error(`Unable to access the JSON script`);
-    };
+        request.onload = () => {
+            if (200 <= request.status && request.status < 400) {
+                JSON_Presenter.present(document.getElementById(`jp-container`), request.responseText);
+        } else {
+                throw Error(`Unable to access the JSON script`);
+            }
+        };
 
-    request.send();
+        request.onerror = () => {
+            throw Error(`Unable to access the JSON script`);
+        };
+
+        request.send();
+    }
 };
 
 const JSON_Presenter = {
-
-    stepno: 0,
 
     present: (container, text) => {
         const containerStyles = [
@@ -71,28 +69,25 @@ const JSON_Presenter = {
         ];
 
         const script = JSON.parse(text);
-        document.title = script.title;
+        if (script.title) {
+            document.title = script.title;
+        }
         const height = Math.round(parseFloat(container.offsetWidth) * script.aspectH / script.aspectW);
         container.style[`height`] = `${Math.round(height)}px`;
         container.style[`position`] = `relative`;
         container.style[`overflow`] = `hidden`;
-        script.element = container;
-        for (const item of containerStyles) {
-            JSON_Presenter.doStyle(container, script.container, item);
-        } 
         container.style[`background-size`] = `cover`;
+        for (const property of containerStyles) {
+            if (typeof script.container[property] !== 'undefined') {
+                container.style[property] = script.container[property];
+            }
+        } 
         JSON_Presenter.initBlocks(container, script.blocks, script.defaults);
         JSON_Presenter.preloadImages(container, script.content);
+        JSON_Presenter.stepno = 0;
         JSON_Presenter.sequence = 1;
         JSON_Presenter.speed = `normal`;
         JSON_Presenter.doStep(script);
-    },
-
-    // Process a style property
-    doStyle: (element, spec, property) => {
-        if (typeof spec[property] !== 'undefined') {
-            element.style[property] = spec[property];
-        }
     },
 
     // Initialize all the blocks
@@ -132,22 +127,22 @@ const JSON_Presenter = {
             if (block.element) {
                 container.removeChild(block.element);
             }
-            w = Math.round(container.getBoundingClientRect().width);
-            h = Math.round(container.getBoundingClientRect().height);
+            w = Math.round(container.getBoundingClientRect().width) / 1000;
+            h = Math.round(container.getBoundingClientRect().height / 1000);
             const properties = block.properties;
             const element = document.createElement(`div`);
             block.element = element;
             element.style[`position`] = `absolute`;
             element.style[`opacity`] = `0.0`;
-            element.style[`left`] = properties.blockLeft * w / 1000;
-            element.style[`top`] = properties.blockTop * h / 1000;
-            element.style[`width`] = `${properties.blockWidth * w / 1000}px`;
-            element.style[`height`] = `${properties.blockHeight * h / 1000}px`;
+            element.style[`left`] = properties.blockLeft * w;
+            element.style[`top`] = properties.blockTop * h;
+            element.style[`width`] = `${properties.blockWidth * w}px`;
+            element.style[`height`] = `${properties.blockHeight * h}px`;
             element.style[`background`] = properties.blockBackground;
             element.style[`border`] = properties.blockBorder;
             container.appendChild(element);
-            const marginLeft = properties.textMarginLeft * w / 1000;
-            const marginTop = properties.textMarginTop * h / 1000;
+            const marginLeft = properties.textMarginLeft * w;
+            const marginTop = properties.textMarginTop * h;
             const inner = document.createElement(`div`);
             inner.style[`position`] = `absolute`;
             inner.style[`left`] = marginLeft;
@@ -157,7 +152,7 @@ const JSON_Presenter = {
             element.inner = inner;
             const text = document.createElement(`div`);
             text.style[`font-family`] = properties.fontFamily;
-            text.style[`font-size`] = `${properties.fontSize * h / 1000}px`;
+            text.style[`font-size`] = `${properties.fontSize * h}px`;
             text.style[`font-weight`] = properties.fontWeight;
             text.style[`font-style`] = properties.fontStyle;
             text.style[`color`] = properties.fontColor;
@@ -172,17 +167,17 @@ const JSON_Presenter = {
             if (block.element) {
                 container.removeChild(block.element);
             }
-            w = Math.round(container.getBoundingClientRect().width);
-            h = Math.round(container.getBoundingClientRect().height);
+            w = Math.round(container.getBoundingClientRect().width / 1000);
+            h = Math.round(container.getBoundingClientRect().height / 1000);
             const properties = block.properties;
             const element = document.createElement(`div`);
             block.element = element;
             element.style[`position`] = `absolute`;
             element.style[`opacity`] = `0.0`;
-            element.style[`left`] = properties.blockLeft * w / 1000;
-            element.style[`top`] = properties.blockTop * h / 1000;
-            element.style[`width`] = `${properties.blockWidth * w / 1000}px`;
-            element.style[`height`] = `${properties.blockHeight * h / 1000}px`;
+            element.style[`left`] = properties.blockLeft * w;
+            element.style[`top`] = properties.blockTop * h;
+            element.style[`width`] = `${properties.blockWidth * w}px`;
+            element.style[`height`] = `${properties.blockHeight * h}px`;
             element.style[`background`] = properties.blockBackground;
             element.style[`border`] = properties.blockBorder;
             element.style[`border-radius`] = properties.blockBorderRadius;
