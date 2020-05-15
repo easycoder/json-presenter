@@ -127,8 +127,8 @@ const JSON_Presenter = {
             if (block.element) {
                 container.removeChild(block.element);
             }
-            w = Math.round(container.getBoundingClientRect().width) / 1000;
-            h = Math.round(container.getBoundingClientRect().height / 1000);
+            const w = container.getBoundingClientRect().width / 1000;
+            const h = container.getBoundingClientRect().height / 1000;
             const properties = block.properties;
             const element = document.createElement(`div`);
             block.element = element;
