@@ -1,8 +1,9 @@
 // JSON::Presenter
 
-const JSON_Presenter = (container, script, stepno) => {
+const JSON_Presenter = (container, script) => {
 
     let speed = `normal`;
+    let stepno= -1;
     let step;
     let mode = `manual`;
 
@@ -53,7 +54,7 @@ const JSON_Presenter = (container, script, stepno) => {
 
     const doPause = () => {
         setTimeout(() => {
-            JSON_Presenter(container, script, stepno);
+            doStep();
         }, speed === `normal` ? step.duration * 1000 : 0);
     };
 
@@ -64,13 +65,13 @@ const JSON_Presenter = (container, script, stepno) => {
                 switch (event.code) {
                     case `Space`:
                     case `ArrowRight`:
-                        JSON_Presenter(container, script, stepno);
+                        doStep();
                         break;
                     case `ArrowLeft`:
                         break;
                     case `Enter`:
                         mode = `auto`;
-                        JSON_Presenter(container, script, stepno);
+                        doStep();
                         break;
                     default:
                         break;
@@ -88,7 +89,7 @@ const JSON_Presenter = (container, script, stepno) => {
                 return true;
             };
             setTimeout(() => {
-                JSON_Presenter(container, script, stepno);
+                doStep();
             }, speed === `normal` ? step.duration * 1000 : 0);
         }
     };
@@ -194,7 +195,7 @@ const JSON_Presenter = (container, script, stepno) => {
         } else {
             setContent(step);
         }
-        JSON_Presenter(container, script, stepno);
+        doStep();
     };
 
     // Show or hide a block
@@ -207,25 +208,27 @@ const JSON_Presenter = (container, script, stepno) => {
         } else {
             script.blocks[step.blocks].element.style[`opacity`] = showHide ? `1.0` : `0.0`;
         }
-        JSON_Presenter(container, script, stepno);
+        doStep();
     };
 
     // Fade up or down
     const doFade = (upDown) => {
         const animSteps = Math.round(step.duration * 25);
+        const stepBlocks = step.blocks;
+        const continueFlag = step.continue;
         let animStep = 0;
         const interval = setInterval(() => {
             if (animStep < animSteps) {
                 const ratio =  0.5 - Math.cos(Math.PI * animStep / animSteps) / 2;
-                if (Array.isArray(step.blocks)) {
-                    let blocks = step.blocks.length;
-                    for (const block of step.blocks)
+                if (Array.isArray(stepBlocks)) {
+                    let blocks = stepBlocks.length;
+                    for (const block of stepBlocks)
                     {
                         const element = script.blocks[block].element;
                         element.style[`opacity`] = upDown ? ratio : 1.0 - ratio;
                     }
                 } else {
-                    const block = script.blocks[step.blocks];
+                    const block = script.blocks[stepBlocks];
                     if (!block.element) {
                         clearInterval(interval);
                         throw Error(`I can't fade up a block with no content`);
@@ -235,13 +238,13 @@ const JSON_Presenter = (container, script, stepno) => {
                 animStep++;
             } else {
                 clearInterval(interval);
-                if (!step.continue) {
-                    JSON_Presenter(container, script, stepno);
+                if (!continueFlag) {
+                    doStep();
                 }
             }
             }, speed === `normal` ? 40 : 0);
-            if (step.continue) {
-                JSON_Presenter(container, script, stepno);
+            if (continueFlag) {
+                doStep();
             }
     };
 
@@ -249,6 +252,7 @@ const JSON_Presenter = (container, script, stepno) => {
     const doCrossfade = () => {
         const block = script.blocks[step.block];
         const content = script.content[step.target];
+        const continueFlag = step.continue;
         let element;
         let newText;
         switch (content.type) {
@@ -325,13 +329,13 @@ const JSON_Presenter = (container, script, stepno) => {
                 }
                 block.element.style[`opacity`] = 1.0 ;
                 element.parentNode.removeChild(element);
-                if (!step.continue) {
-                    JSON_Presenter(container, script, stepno);
+                if (!continueFlag) {
+                    doStep();
                 }
             }
             }, speed === `normal` ? 80 : 0);
-            if (step.continue) {
-                JSON_Presenter(container, script, stepno);
+            if (continueFlag) {
+                doStep();
             }
     };
 
@@ -417,28 +421,83 @@ const JSON_Presenter = (container, script, stepno) => {
     const doTransition = () => {
         const animSteps = Math.round(step.duration * 25);
         let animStep = 0;
+        const stepType = step.type;
+        const continueFlag = step.continue;
+        const block = script.blocks[step.block];
+        const target = script.blocks[step.target];
         const interval = setInterval(() => {
             if (animStep < animSteps) {
                 const ratio =  0.5 - Math.cos(Math.PI * animStep / animSteps) / 2;
-                const block = script.blocks[step.block];
-                const target = script.blocks[step.target];
-                if (Array.isArray(step.type)) {
-                    for (const type of step.type) {
+                if (Array.isArray(stepType)) {
+                    for (const type of stepType) {
                         doTransitionStep(type, block, target, ratio);
                     }
                 } else {
-                    doTransitionStep(step.type, block, target, ratio);
+                    doTransitionStep(type, block, target, ratio);
                 }
                 animStep++;
             } else {
                 clearInterval(interval);
-                if (!step.continue) {
-                    JSON_Presenter(container, script, stepno);
+                if (!continueFlag) {
+                    doStep();
                 }
             }
             }, speed === `normal` ? 40 : 0);
-            if (step.continue) {
-            JSON_Presenter(container, script, stepno);
+            if (continueFlag) {
+            doStep();
+        }
+    };
+
+    // Process a single step
+    const doStep = () => {
+        if (stepno < script.steps.length) {
+            step = script.steps[stepno++];
+            while (!step.action) {
+                if (step.speed) {
+                    speed = step.speed;
+                }
+                else throw Error(`Unknown syntax: '${JSON.stringify(step, 0, 2)}'`);
+                step = script.steps[stepno++];
+            }
+            if (step.comment) {
+                console.log(`Step ${stepno}: ${step.comment}`);
+            } else {
+                console.log(`Step ${stepno}: ${step.action}`);
+            }
+            switch (step.action) {
+                case `set content`:
+                    doSetContent();
+                    break;
+                case `show`:
+                    doShowHide(true);
+                    break;
+                case `hide`:
+                    doShowHide(false);
+                    break;
+                case `pause`:
+                    doPause();
+                    break;
+                case `hold`:
+                    doHold();
+                    break;
+                case `fade up`:
+                    doFade(true);
+                    break;
+                case `fade down`:
+                    doFade(false);
+                    break;
+                case `crossfade`:
+                    doCrossfade();
+                    break;
+                case`transition`:
+                    doTransition();
+                    break;
+                default:
+                    throw Error(`Unknown action: '${step.action}'`);
+            }
+        }
+        else {
+            console.log(`Step ${stepno}: Finished`);  
         }
     };
 
@@ -460,57 +519,7 @@ const JSON_Presenter = (container, script, stepno) => {
         initBlocks(container, script.blocks, script.defaults);
         preloadImages(script.content);
         stepno = 0;
-    }
-
-    // Process a single step
-    if (stepno < script.steps.length) {
-        step = script.steps[stepno++];
-        while (!step.action) {
-            if (step.speed) {
-                speed = step.speed;
-            }
-            else throw Error(`Unknown syntax: '${JSON.stringify(step, 0, 2)}'`);
-            step = script.steps[stepno++];
-        }
-        if (step.comment) {
-            console.log(`Step ${stepno}: ${step.comment}`);
-        } else {
-            console.log(`Step ${stepno}: ${step.action}`);
-        }
-        switch (step.action) {
-            case `set content`:
-                doSetContent();
-                break;
-            case `show`:
-                doShowHide(true);
-                break;
-            case `hide`:
-                doShowHide(false);
-                break;
-            case `pause`:
-                doPause();
-                break;
-            case `hold`:
-                doHold();
-                break;
-            case `fade up`:
-                doFade(true);
-                break;
-            case `fade down`:
-                doFade(false);
-                break;
-            case `crossfade`:
-                doCrossfade();
-                break;
-            case`transition`:
-                doTransition();
-                break;
-            default:
-                throw Error(`Unknown action: '${step.action}'`);
-        }
-    }
-    else {
-        console.log(`Step ${stepno}: Finished`);  
+        doStep();
     }
 };
 
@@ -549,7 +558,7 @@ window.onload = () => {
         request.onload = () => {
             if (200 <= request.status && request.status < 400) {
                 const script = JSON.parse(request.responseText);
-                JSON_Presenter(document.getElementById(`jp-container`), script, -1);
+                JSON_Presenter(document.getElementById(`jp-container`), script);
         } else {
                 throw Error(`Unable to access the JSON script`);
             }
