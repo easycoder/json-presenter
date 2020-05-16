@@ -510,6 +510,7 @@ const JSON_Presenter = (container, script) => {
 
     // Initialization
     const init = () => {
+        container.innerHTML = ``;
         document.removeEventListener(`click`, init);
         document.onkeydown = null;
         if (script.title) {
