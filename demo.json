@@ -196,6 +196,11 @@
             "duration": 1
         },
         {
+            "comment": "--------------------------------------- Wait for user",
+            "action": "hold",
+            "duration": 0
+        },
+        {
             "comment": "----------------------------- Fade up the image block",
             "action": "fade up",
             "blocks": "left image",

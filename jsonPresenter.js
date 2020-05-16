@@ -4,6 +4,7 @@ const JSON_Presenter = (container, script, stepno) => {
 
     let speed = `normal`;
     let step;
+    let mode = `manual`;
 
     const containerStyles = [
         `border`,
@@ -57,9 +58,39 @@ const JSON_Presenter = (container, script, stepno) => {
     };
 
     const doHold = () => {
-        setTimeout(() => {
-            JSON_Presenter(container, script, stepno);
-        }, speed === `normal` ? step.duration * 1000 : 0);
+        if (mode === `manual`) {
+            document.onkeydown = function (event) {
+                document.onkeydown = null;
+                switch (event.code) {
+                    case `Space`:
+                    case `ArrowRight`:
+                        JSON_Presenter(container, script, stepno);
+                        break;
+                    case `ArrowLeft`:
+                        break;
+                    case `Enter`:
+                        mode = `auto`;
+                        JSON_Presenter(container, script, stepno);
+                        break;
+                    default:
+                        break;
+                }
+                return true;
+            };
+        } else {
+            document.onkeydown = function (event) {
+                document.onkeydown = null;
+                switch (event.code) {
+                    case `Enter`:
+                        mode = `manual`;
+                        break;
+                }
+                return true;
+            };
+            setTimeout(() => {
+                JSON_Presenter(container, script, stepno);
+            }, speed === `normal` ? step.duration * 1000 : 0);
+        }
     };
 
     // Create a text block.
@@ -163,6 +194,7 @@ const JSON_Presenter = (container, script, stepno) => {
         } else {
             setContent(step);
         }
+        JSON_Presenter(container, script, stepno);
     };
 
     // Show or hide a block
@@ -175,6 +207,7 @@ const JSON_Presenter = (container, script, stepno) => {
         } else {
             script.blocks[step.blocks].element.style[`opacity`] = showHide ? `1.0` : `0.0`;
         }
+        JSON_Presenter(container, script, stepno);
     };
 
     // Fade up or down
@@ -430,7 +463,7 @@ const JSON_Presenter = (container, script, stepno) => {
     }
 
     // Process a single step
-    while (stepno < script.steps.length) {
+    if (stepno < script.steps.length) {
         step = script.steps[stepno++];
         while (!step.action) {
             if (step.speed) {
@@ -456,27 +489,29 @@ const JSON_Presenter = (container, script, stepno) => {
                 break;
             case `pause`:
                 doPause();
-                return;
+                break;
             case `hold`:
                 doHold();
-                return;
+                break;
             case `fade up`:
                 doFade(true);
-                return;
+                break;
             case `fade down`:
                 doFade(false);
-                return;
+                break;
             case `crossfade`:
                 doCrossfade();
-                return;
+                break;
             case`transition`:
                 doTransition();
-                return;
+                break;
             default:
                 throw Error(`Unknown action: '${step.action}'`);
         }
     }
-    console.log(`Step ${stepno}: Finished`);  
+    else {
+        console.log(`Step ${stepno}: Finished`);  
+    }
 };
 
 window.onload = () => {
