@@ -1,8 +1,8 @@
 {
     "title": "JSON::Presenter",
     "description": "A demo presentation that outlines some features of JSON::Presenter",
-    "aspectW": 16,
-    "aspectH": 9,
+    "aspectW": 160,
+    "aspectH": 89,
     "container": {
         "border": "1px solid black",
         "background": "black"
@@ -110,7 +110,7 @@
     "steps": [
         {
             "comment": "------------------------------- Pause before we start",
-            "action": "hold",
+            "action": "pause",
             "duration": 2
         },
         {

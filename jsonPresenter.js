@@ -58,14 +58,21 @@ const JSON_Presenter = (container, script) => {
         }, speed === `normal` ? step.duration * 1000 : 0);
     };
 
+    const release = () => {
+        document.removeEventListener(`click`, release);
+        document.onkeydown = null;
+        doStep();
+    };
+
     const doHold = () => {
         if (mode === `manual`) {
+            document.addEventListener(`click`, release);
             document.onkeydown = function (event) {
                 document.onkeydown = null;
                 switch (event.code) {
                     case `Space`:
                     case `ArrowRight`:
-                        doStep();
+                        release();
                         break;
                     case `ArrowLeft`:
                         break;
@@ -501,8 +508,10 @@ const JSON_Presenter = (container, script) => {
         }
     };
 
-    if (stepno === -1) {
-
+    // Initialization
+    const init = () => {
+        document.removeEventListener(`click`, init);
+        document.onkeydown = null;
         if (script.title) {
             document.title = script.title;
         }
@@ -515,11 +524,34 @@ const JSON_Presenter = (container, script) => {
             if (typeof script.container[property] !== 'undefined') {
                 container.style[property] = script.container[property];
             }
-        } 
+        }
         initBlocks(container, script.blocks, script.defaults);
         preloadImages(script.content);
         stepno = 0;
         doStep();
+    }
+
+    // Set the default mode
+    const modeValue = document.getElementById(`jp-mode`);
+    if (typeof modeValue !== 'undefined') {
+        mode = modeValue.innerText;
+    }
+    // Wait for a click/tap or a keypress to start
+    if (stepno === -1) {
+        document.addEventListener(`click`, init);
+        document.onkeydown = function (event) {
+            document.onkeydown = null;
+            switch (event.code) {
+                case `Enter`:
+                    mode = `auto`;
+                    break;
+                default:
+                    mode = `manual`;
+                    break;
+            }
+            init();
+            return true;
+        };
     }
 };
 
