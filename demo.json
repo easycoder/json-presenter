@@ -109,6 +109,11 @@
     },
     "steps": [
         {
+            "comment": "------------------------------- Pause before we start",
+            "action": "hold",
+            "duration": 2
+        },
+        {
             "comment": "---------------------------------- Set up the content",
             "action": "set content",
             "blocks": [
@@ -125,11 +130,6 @@
                     "content": "flowers"
                 }
             ]
-        },
-        {
-            "comment": "------------------------------- Pause before we start",
-            "action": "hold",
-            "duration": 2
         },
         {
             "comment": "----------------------------- Fade up the intro title",
