@@ -109,9 +109,6 @@
     },
     "steps": [
         {
-            "speed": "normal"
-        },
-        {
             "comment": "---------------------------------- Set up the content",
             "action": "set content",
             "blocks": [
@@ -161,7 +158,7 @@
         },
         {
             "comment": "----------------------------- Pause for half a second",
-            "action": "hold",
+            "action": "pause",
             "duration": 0.5
         },
         {
@@ -203,9 +200,6 @@
             "action": "fade up",
             "blocks": "left image",
             "duration": 2
-        },
-        {
-            "speed": "normal"
         },
         {
             "comment": "-------------------------------------- Wait 8 seconds",
