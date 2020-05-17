@@ -6,6 +6,7 @@ const JSON_Presenter = (container, script) => {
     let stepno= -1;
     let step;
     let mode = `manual`;
+    let clicked = false;
 
     const containerStyles = [
         `border`,
@@ -64,40 +65,47 @@ const JSON_Presenter = (container, script) => {
         doStep();
     };
 
+    const doManual = () => {
+        container.style.cursor = 'pointer';
+        document.addEventListener(`click`, release);
+        document.onkeydown = (event) => {
+            switch (event.code) {
+                case `Space`:
+                case `ArrowRight`:
+                    document.onkeydown = null;
+                    release();
+                    break;
+                case `ArrowLeft`:
+                    break;
+                case `Enter`:
+                    container.style.cursor = 'none';
+                    document.addEventListener(`click`, onClick);
+                    mode = `auto`;
+                    release();
+                    break;
+            }
+            return true;
+        };
+    };
+
+    const onClick = () => {
+        clicked = true;
+    };
+
     const doHold = () => {
         if (mode === `manual`) {
-            document.addEventListener(`click`, release);
-            document.onkeydown = function (event) {
-                document.onkeydown = null;
-                switch (event.code) {
-                    case `Space`:
-                    case `ArrowRight`:
-                        release();
-                        break;
-                    case `ArrowLeft`:
-                        break;
-                    case `Enter`:
-                        mode = `auto`;
-                        doStep();
-                        break;
-                    default:
-                        break;
-                }
-                return true;
-            };
-        } else {
-            document.onkeydown = function (event) {
-                document.onkeydown = null;
-                switch (event.code) {
-                    case `Enter`:
-                        mode = `manual`;
-                        break;
-                }
-                return true;
-            };
-            setTimeout(() => {
-                doStep();
-            }, speed === `normal` ? step.duration * 1000 : 0);
+            doManual();
+       } else {
+            if (clicked) {
+                document.removeEventListener(`click`, onClick);
+                clicked = false;
+                mode = `manual`;
+                doManual();
+            } else {
+                setTimeout(() => {
+                    doStep();
+                }, speed === `normal` ? step.duration * 1000 : 0);
+            }
         }
     };
 
@@ -505,6 +513,7 @@ const JSON_Presenter = (container, script) => {
         }
         else {
             console.log(`Step ${stepno}: Finished`);  
+            container.style.cursor = 'auto';
         }
     };
 
@@ -512,14 +521,17 @@ const JSON_Presenter = (container, script) => {
     const init = () => {
         container.innerHTML = ``;
         document.removeEventListener(`click`, init);
+        if (mode === `auto`) {
+            document.addEventListener(`click`, onClick);
+        }
         document.onkeydown = null;
         if (script.title) {
             document.title = script.title;
         }
         const height = Math.round(parseFloat(container.offsetWidth) * script.aspectH / script.aspectW);
-        container.style[`height`] = `${Math.round(height)}px`;
-        container.style[`position`] = `relative`;
-        container.style[`overflow`] = `hidden`;
+        container.style.height = `${Math.round(height)}px`;
+        container.style.position = `relative`;
+        container.style.overflow = `hidden`;
         container.style[`background-size`] = `cover`;
         for (const property of containerStyles) {
             if (typeof script.container[property] !== 'undefined') {
@@ -544,9 +556,11 @@ const JSON_Presenter = (container, script) => {
         switch (event.code) {
             case `Enter`:
                 mode = `auto`;
+                container.style.cursor = 'none';
                 break;
             default:
                 mode = `manual`;
+                container.style.cursor = 'auto';
                 break;
         }
         init();
