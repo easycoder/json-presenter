@@ -60,6 +60,7 @@ const JSON_Presenter = (container, script) => {
     };
 
     const release = () => {
+        container.style.cursor = 'none';
         document.removeEventListener(`click`, release);
         document.onkeydown = null;
         doStep();
@@ -513,7 +514,7 @@ const JSON_Presenter = (container, script) => {
         }
         else {
             console.log(`Step ${stepno}: Finished`);  
-            container.style.cursor = 'auto';
+            container.style.cursor = 'pointer';
         }
     };
 
@@ -532,6 +533,7 @@ const JSON_Presenter = (container, script) => {
         container.style.height = `${Math.round(height)}px`;
         container.style.position = `relative`;
         container.style.overflow = `hidden`;
+        container.style.cursor = 'none';
         container.style[`background-size`] = `cover`;
         for (const property of containerStyles) {
             if (typeof script.container[property] !== 'undefined') {
@@ -560,7 +562,6 @@ const JSON_Presenter = (container, script) => {
                 break;
             default:
                 mode = `manual`;
-                container.style.cursor = 'auto';
                 break;
         }
         init();
