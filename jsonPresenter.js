@@ -538,22 +538,20 @@ const JSON_Presenter = (container, script) => {
         mode = modeValue.innerText;
     }
     // Wait for a click/tap or a keypress to start
-    if (stepno === -1) {
-        document.addEventListener(`click`, init);
-        document.onkeydown = function (event) {
-            document.onkeydown = null;
-            switch (event.code) {
-                case `Enter`:
-                    mode = `auto`;
-                    break;
-                default:
-                    mode = `manual`;
-                    break;
-            }
-            init();
-            return true;
-        };
-    }
+    document.addEventListener(`click`, init);
+    document.onkeydown = function (event) {
+        document.onkeydown = null;
+        switch (event.code) {
+            case `Enter`:
+                mode = `auto`;
+                break;
+            default:
+                mode = `manual`;
+                break;
+        }
+        init();
+        return true;
+    };
 };
 
 window.onload = () => {
