@@ -546,23 +546,12 @@ const JSON_Presenter = (container, script) => {
         doStep();
     }
 
-    // Set the default mode
-    const modeValue = document.getElementById(`jp-mode`);
-    if (typeof modeValue !== 'undefined') {
-        mode = modeValue.innerText;
-    }
     // Wait for a click/tap or a keypress to start
     document.addEventListener(`click`, init);
     document.onkeydown = function (event) {
         document.onkeydown = null;
-        switch (event.code) {
-            case `Enter`:
-                mode = `auto`;
-                container.style.cursor = 'none';
-                break;
-            default:
-                mode = `manual`;
-                break;
+        if (event.code === `Enter`) {
+            mode = `auto`;
         }
         init();
         return true;
