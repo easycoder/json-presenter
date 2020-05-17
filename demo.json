@@ -85,7 +85,7 @@
             "content": [
                 "JSON::Presenter offers a range of block types and transitions that make it easy to create slick, effective presentations.",
                 
-                "This demo illustrates some of the features of the system."
+                "This short demo illustrates some of the features of the system."
             ]
         },
         "slide 3": {
@@ -194,11 +194,6 @@
             "block": "body",
             "target": "body right",
             "duration": 1
-        },
-        {
-            "comment": "--------------------------------------- Wait for user",
-            "action": "hold",
-            "duration": 0
         },
         {
             "comment": "----------------------------- Fade up the image block",
