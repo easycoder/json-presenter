@@ -505,7 +505,7 @@ const JSON_Presenter = (container, script) => {
                 case `crossfade`:
                     doCrossfade();
                     break;
-                case`transition`:
+                case `transition`:
                     doTransition();
                     break;
                 default:
