@@ -8,6 +8,6 @@ This is not a PowerPoint emulation. Among my aims are to include animation featu
 
 The JSON::Presenter project is in an early stage of development. Comments and enquiries are welcome.
 
-For an overview of the project see [this article on dev.to](https://dev.to/).
+For an overview of the project see [this article on dev.to](https://dev.to/gtanyware/json-presenter-a-scripting-language-for-web-based-presentations-1okf).
 
 This README will be extended to become a reference manual for JSON::Presenter.
