@@ -258,10 +258,10 @@ const JSON_Presenter = (container, script) => {
                     doStep();
                 }
             }
-            }, speed === `normal` ? 40 : 0);
-            if (continueFlag) {
-                doStep();
-            }
+        }, speed === `normal` ? 40 : 0);
+        if (continueFlag) {
+            doStep();
+        }
     };
 
     // Handle a crossfade
@@ -549,7 +549,6 @@ const JSON_Presenter = (container, script) => {
     // Wait for a click/tap or a keypress to start
     document.addEventListener(`click`, init);
     document.onkeydown = function (event) {
-        document.onkeydown = null;
         if (event.code === `Enter`) {
             mode = `auto`;
         }
