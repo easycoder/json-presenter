@@ -142,6 +142,8 @@ and for multiple blocks, use this:
 ```
 In all cases the blocks and the content are identified by their names.
 
+When this action runs the block(s) named are constructed as `div` elements and added to the container. There is currently no specified z-indexing as visibility is determined by opacity. This means that if you want to overlay one block on another (where both will be at least partially visible) you must declare it later than the one it overlays.
+
 ### `show`
 
 Shows one or more blocks, i.e. makes them visible. This also takes 2 different forms:
@@ -158,11 +160,9 @@ and
     "comment": "------------------------------------ Show some blocks",
     "action": "set content",
     "blocks": [
-        {
-            "title",
-            "body",
-            "left image"
-        }
+        "title",
+        "body",
+        "left image"
     ]
 },
 ```
