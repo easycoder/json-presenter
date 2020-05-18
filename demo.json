@@ -180,7 +180,7 @@
             "duration": 1
         },
         {
-            "comment": "------------------------------------- Wait 5 seconds",
+            "comment": "-------------------------------------- Wait 5 seconds",
             "action": "hold",
             "duration": 5
         },
