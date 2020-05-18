@@ -184,7 +184,7 @@ Pause the presentation for the duration given (in seconds).
 
 ### `hold`
 
-This is like `pause` except that in manual mode the presentation will stop and wait for the user to press a key or click/tap. The `duration` property has no effect in this case.
+This is like `pause` except that in manual mode the presentation will stop and wait for the user to press a key or click/tap. The `duration` property has no effect in this case. You can use a duration of 0 if you just want to provide for user action (like a slide change in PowrPoint).
 
 ```json
 {
