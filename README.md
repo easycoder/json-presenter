@@ -108,6 +108,19 @@ This is the presentation proper.The engine runs through the list in linear order
 
 Every step has an `action` property from this list:
 
+ - `set content`
+ - `show`
+ - `hide`
+ - `pause`
+ - `hold`
+ - `fade up`
+ - `fade down`
+ - `crossfade`
+ - `transition`
+ - `reset`
+ - `goto`
+ - `load`
+
 ### `set content`
 
 Use this action to set content into one or more blocks. For a single block use this:
@@ -272,3 +285,80 @@ In all cases the new values are held in a `target` block of the same type as the
 In this example the `title` block is moved and resized and its text size and color are changed, all concurrently, where the ending values are provided in a block called `title 2` that need not have any content and therefore does not exist in the DOM.
 
 Transitions run at 25 updates per second.
+
+### `reset`
+
+Reset all the blocks to their original sizes and positions. Their content remains unchanged. This is useful in conjunction with `goto` to implement presentations that run forever.
+
+### `goto`
+
+Go to a specified step. The syntax is
+```json
+{
+    "comment": "-------------------------------- Go back to the start",
+    "action": "goto",
+    "step": "start"
+}
+```
+The target of the `goto` must have a `label` property with a unique value, as in
+```json
+{
+    "comment": "------------------------------- Pause before we start",
+    "action": "pause",
+    "duration": 2,
+    "label": "start"
+},
+```
+
+### `load`
+
+Load a plugin extension to JSON::Presenter. This is a JavaScript file with a fixed format, as in this example, which fades a block down then back up again in the space of one second:
+```javascript
+const JSON_Presenter_Test = step => {
+    const animSteps = Math.round(step.duration * 25);
+    let animStep = 0;
+    let interval = setInterval(() => {
+        if (animStep < animSteps) {
+            const ratio =  0.5 - Math.cos(Math.PI * animStep / animSteps) / 2;
+            const block = step.script.blocks[step.block];
+            block.element.style[`opacity`] = 1.0 - ratio;
+            animStep++;
+        } else {
+            clearInterval(interval);
+            animStep = 0;
+            interval = setInterval(() => {
+                if (animStep < animSteps) {
+                    const ratio =  0.5 - Math.cos(Math.PI * animStep / animSteps) / 2;
+                    const block = step.script.blocks[step.block];
+                    block.element.style[`opacity`] = ratio;
+                    animStep++;
+                } else {
+                    clearInterval(interval);
+                    step.next();
+                }
+            }, 40);
+        }
+    }, 40);
+};
+
+JSON_Presenter.plugins.test = JSON_Presenter_Test;
+```
+The plugin takes a single `step` argument; this provides access to everything else inside the JSON::Presenter environment. The name of the plugin is recommended to start with `JSON_Presenter` to avoid namespace clashes. The plugin runs when it is loaded and installs itself into the `plugins` property of the main program. It will then be available as an action under the name given, in this case `test`. To supply it with options, add them as properties of the `step`. Here the value `duration` is passed in. The step in your presentation script will look like this:
+```json
+{
+    "comment": "--------------------------------- Run the test plugin",
+    "action": "test",
+    "block": "title",
+    "duration": 0.5
+}
+```
+
+The format of the `load` action is
+```json
+{
+    "comment": "-------------------------------- Load the test module",
+    "action": "load",
+    "url": "test.js"
+}
+```
+where the `url` property is the full URL needed to access the file.

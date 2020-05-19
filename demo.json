@@ -111,7 +111,8 @@
         {
             "comment": "------------------------------- Pause before we start",
             "action": "pause",
-            "duration": 2
+            "duration": 2,
+            "label": "start"
         },
         {
             "comment": "---------------------------------- Set up the content",
@@ -238,6 +239,15 @@
                 "left image"
             ],
             "duration": 3
+        },
+        {
+            "comment": "----------------------------------------------- Reset",
+            "action": "reset"
+        },
+        {
+            "comment": "-------------------------------- Go back to the start",
+            "action": "goto",
+            "target": "start"
         }
     ]
 }
