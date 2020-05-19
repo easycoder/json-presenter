@@ -3,8 +3,6 @@
 const JSON_Presenter = (container, script) => {
 
     let speed = `normal`;
-    let stepno= -1;
-    let step;
     let mode = `manual`;
     let clicked = false;
 
@@ -26,7 +24,9 @@ const JSON_Presenter = (container, script) => {
     ];
 
     // Initialize all the blocks
-    const initBlocks = (container, blocks, defaults) => {
+    const initBlocks = () => {
+        const defaults = script.defaults;
+        const blocks = script.blocks;
         for (const name in blocks) {
             const block = blocks[name];
             const properties = {};
@@ -44,8 +44,8 @@ const JSON_Presenter = (container, script) => {
     };
 
     // Preload all the images
-    const preloadImages = (content) => {
-        for (const item in content) {
+    const preloadImages = () => {
+        for (const item in script.content) {
             if (item.type == `image`) {
                 item.img = document.createElement(`div`);
                 item.img.style[`background`] = `url("${item.url}")`;
@@ -53,20 +53,20 @@ const JSON_Presenter = (container, script) => {
         }
     };
 
-    const doPause = () => {
+    const pause = step => {
         setTimeout(() => {
-            doStep();
+            step.next();
         }, speed === `normal` ? step.duration * 1000 : 0);
     };
 
-    const release = () => {
+    const release = step => {
         container.style.cursor = 'none';
         document.removeEventListener(`click`, release);
         document.onkeydown = null;
-        doStep();
+        step.next();
     };
 
-    const doManual = () => {
+    const doManual = step => {
         container.style.cursor = 'pointer';
         document.addEventListener(`click`, release);
         document.onkeydown = (event) => {
@@ -74,7 +74,7 @@ const JSON_Presenter = (container, script) => {
                 case `Space`:
                 case `ArrowRight`:
                     document.onkeydown = null;
-                    release();
+                    release(step);
                     break;
                 case `ArrowLeft`:
                     break;
@@ -82,7 +82,7 @@ const JSON_Presenter = (container, script) => {
                     container.style.cursor = 'none';
                     document.addEventListener(`click`, onClick);
                     mode = `auto`;
-                    release();
+                    release(step);
                     break;
             }
             return true;
@@ -93,18 +93,18 @@ const JSON_Presenter = (container, script) => {
         clicked = true;
     };
 
-    const doHold = () => {
+    const hold = step => {
         if (mode === `manual`) {
-            doManual();
+            doManual(step);
        } else {
             if (clicked) {
                 document.removeEventListener(`click`, onClick);
                 clicked = false;
                 mode = `manual`;
-                doManual();
+                doManual(step);
             } else {
                 setTimeout(() => {
-                    doStep();
+                    step.next();
                 }, speed === `normal` ? step.duration * 1000 : 0);
             }
         }
@@ -174,7 +174,7 @@ const JSON_Presenter = (container, script) => {
     };
 
     // Set the content of a block
-    const setContent = (spec) => {
+    const doSetContent = (spec) => {
         const block = script.blocks[spec.block];
         const contentSpec = script.content[spec.content];
         if (!block) {
@@ -202,20 +202,20 @@ const JSON_Presenter = (container, script) => {
     };
 
     // Set the content of a block
-    const doSetContent = () => {
+    const setcontent = step => {
         if (step.blocks) {
             for (const spec of step.blocks)
             {
-                setContent(spec);
+                doSetContent(spec);
             }
         } else {
-            setContent(step);
+            doSetContent(step);
         }
-        doStep();
+        step.next();
     };
 
     // Show or hide a block
-    const doShowHide = (showHide) => {
+    const doShowHide = (step, showHide) => {
         if (Array.isArray(step.blocks)) {
             for (const block of step.blocks)
             {
@@ -227,8 +227,16 @@ const JSON_Presenter = (container, script) => {
         doStep();
     };
 
+    const show = step => {
+        doShowHide(step, true);
+    };
+
+    const hide = step => {
+        doShowHide(step, false);
+    };
+
     // Fade up or down
-    const doFade = (upDown) => {
+    const doFade = (step, upDown) => {
         const animSteps = Math.round(step.duration * 25);
         const stepBlocks = step.blocks;
         const continueFlag = step.continue;
@@ -255,17 +263,25 @@ const JSON_Presenter = (container, script) => {
             } else {
                 clearInterval(interval);
                 if (!continueFlag) {
-                    doStep();
+                    step.next();
                 }
             }
         }, speed === `normal` ? 40 : 0);
         if (continueFlag) {
-            doStep();
+            step.next();
         }
     };
 
+    const fadeup = step => {
+        doFade(step, true);
+    };
+
+    const fadedown = step => {
+        doFade(step, false);
+    };
+
     // Handle a crossfade
-    const doCrossfade = () => {
+    const crossfade = step => {
         const block = script.blocks[step.block];
         const content = script.content[step.target];
         const continueFlag = step.continue;
@@ -346,12 +362,12 @@ const JSON_Presenter = (container, script) => {
                 block.element.style[`opacity`] = 1.0 ;
                 element.parentNode.removeChild(element);
                 if (!continueFlag) {
-                    doStep();
+                    step.next();
                 }
             }
             }, speed === `normal` ? 80 : 0);
             if (continueFlag) {
-                doStep();
+                step.next();
             }
     };
 
@@ -434,7 +450,7 @@ const JSON_Presenter = (container, script) => {
     };
 
     // Handle a transition
-    const doTransition = () => {
+    const transition = step => {
         const animSteps = Math.round(step.duration * 25);
         let animStep = 0;
         const stepType = step.type;
@@ -455,67 +471,93 @@ const JSON_Presenter = (container, script) => {
             } else {
                 clearInterval(interval);
                 if (!continueFlag) {
-                    doStep();
+                    step.next();
                 }
             }
             }, speed === `normal` ? 40 : 0);
             if (continueFlag) {
-            doStep();
+            step.next();
         }
     };
 
+    const reset = step => {
+
+        const defaults = script.defaults;
+        const blocks = script.blocks;
+        for (const block of Object.values(script.blocks)) {
+            if (block.element) {
+                block.element.parentNode.removeChild(block.element);
+                block.element = null;
+            }
+            const properties = {};
+            // Set up the default properties
+            for (const name in defaults) {
+                properties[name] = defaults[name];
+            }
+            // Override with local values
+            for (const name in block) {
+                properties[name] = block[name];
+            }
+            block.properties = properties;
+        };
+        step.next();
+    };
+
+    const goto = step => {
+		doStep(script.steps[step.step]);
+    };
+
+    const load = step => {
+		const element = document.createElement(`script`);
+		element.src = step.url;
+		element.onload = () => {
+            console.log(`Library ${element.src} loaded`);
+            step.next();
+        };
+        element.onerror = () => {
+            throw Error(`Can't load plugin ${step.url}`);
+		};
+		document.head.appendChild(element);
+    };
+
+    const actions = {
+        setcontent,
+        show,
+        hide,
+        pause,
+        hold,
+        fadeup,
+        fadedown,
+        crossfade,
+        transition,
+        reset,
+        goto,
+        load
+    };
+
     // Process a single step
-    const doStep = () => {
-        if (stepno < script.steps.length) {
+    const doStep = step => {
+        while (!step.action) {
+            if (step.speed) {
+                speed = step.speed;
+            }
+            else throw Error(`Unknown syntax: '${JSON.stringify(step, 0, 2)}'`);
             step = script.steps[stepno++];
-            while (!step.action) {
-                if (step.speed) {
-                    speed = step.speed;
-                }
-                else throw Error(`Unknown syntax: '${JSON.stringify(step, 0, 2)}'`);
-                step = script.steps[stepno++];
-            }
-            if (step.comment) {
-                console.log(`Step ${stepno}: ${step.comment}`);
-            } else {
-                console.log(`Step ${stepno}: ${step.action}`);
-            }
-            switch (step.action) {
-                case `set content`:
-                    doSetContent();
-                    break;
-                case `show`:
-                    doShowHide(true);
-                    break;
-                case `hide`:
-                    doShowHide(false);
-                    break;
-                case `pause`:
-                    doPause();
-                    break;
-                case `hold`:
-                    doHold();
-                    break;
-                case `fade up`:
-                    doFade(true);
-                    break;
-                case `fade down`:
-                    doFade(false);
-                    break;
-                case `crossfade`:
-                    doCrossfade();
-                    break;
-                case `transition`:
-                    doTransition();
-                    break;
-                default:
-                    throw Error(`Unknown action: '${step.action}'`);
+        }
+        if (step.comment) {
+            console.log(`Step ${step.index}: ${step.comment}`);
+        } else {
+            console.log(`Step ${step.index}: ${step.action}`);
+        }
+        const actionName = step.action.split(` `).join(``);
+        let handler = actions[actionName];
+        if (typeof handler === `undefined`) {
+            handler = JSON_Presenter.plugins[actionName];
+            if (typeof handler === `undefined`) {
+                throw Error(`Unknown action: '${step.action}'`);
             }
         }
-        else {
-            console.log(`Step ${stepno}: Finished`);  
-            container.style.cursor = 'pointer';
-        }
+        handler(step);
     };
 
     // Initialization
@@ -529,6 +571,7 @@ const JSON_Presenter = (container, script) => {
         if (script.title) {
             document.title = script.title;
         }
+        script.container.element = container;
         const height = Math.round(parseFloat(container.offsetWidth) * script.aspectH / script.aspectW);
         container.style.height = `${Math.round(height)}px`;
         container.style.position = `relative`;
@@ -540,10 +583,25 @@ const JSON_Presenter = (container, script) => {
                 container.style[property] = script.container[property];
             }
         }
-        initBlocks(container, script.blocks, script.defaults);
-        preloadImages(script.content);
-        stepno = 0;
-        doStep();
+        for (const [index, step] of script.steps.entries()) {
+            step.index = index;
+            step.script = script;
+            if (index < script.steps.length - 1) {
+                step.next = () => {
+                    doStep(script.steps[index + 1]);
+                }
+            }
+            else {
+                step.next = () => {
+                    console.log(`Step ${index + 1}: Finished`);  
+                    container.style.cursor = 'pointer';
+                }
+            };
+        }
+        JSON_Presenter.plugins = {};
+        initBlocks();
+        preloadImages();
+        doStep(script.steps[0]);
     }
 
     // Wait for a click/tap or a keypress to start

@@ -238,6 +238,15 @@
                 "left image"
             ],
             "duration": 3
+        },
+        {
+            "comment": "----------------------------------------------- Reset",
+            "action": "reset"
+        },
+        {
+            "comment": "---------------------------------------- Go to step 0",
+            "action": "goto",
+            "step": 0
         }
     ]
 }
