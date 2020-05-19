@@ -483,7 +483,6 @@ const JSON_Presenter = (container, script) => {
     const reset = step => {
 
         const defaults = script.defaults;
-        const blocks = script.blocks;
         for (const block of Object.values(script.blocks)) {
             if (block.element) {
                 block.element.parentNode.removeChild(block.element);
@@ -504,7 +503,12 @@ const JSON_Presenter = (container, script) => {
     };
 
     const goto = step => {
-		doStep(script.steps[step.step]);
+        const target = script.labels[step.target];
+        if (typeof target !== `undefined`) {
+        doStep(script.steps[target]);
+        } else {
+            throw Error(`Unknown label '${step.target}`);
+        }
     };
 
     const load = step => {
@@ -583,9 +587,13 @@ const JSON_Presenter = (container, script) => {
                 container.style[property] = script.container[property];
             }
         }
+        script.labels = {};
         for (const [index, step] of script.steps.entries()) {
             step.index = index;
             step.script = script;
+            if (typeof step.label !== `undefined`) {
+                script.labels[step.label] = index;
+            }
             if (index < script.steps.length - 1) {
                 step.next = () => {
                     doStep(script.steps[index + 1]);
