@@ -117,7 +117,6 @@ Every step has an `action` property from this list:
  - `fade down`
  - `crossfade`
  - `transition`
- - `reset`
  - `goto`
  - `load`
 
@@ -285,10 +284,6 @@ In all cases the new values are held in a `target` block of the same type as the
 In this example the `title` block is moved and resized and its text size and color are changed, all concurrently, where the ending values are provided in a block called `title 2` that need not have any content and therefore does not exist in the DOM.
 
 Transitions run at 25 updates per second.
-
-### `reset`
-
-Reset all the blocks to their original sizes and positions. Their content remains unchanged. This is useful in conjunction with `goto` to implement presentations that run forever.
 
 ### `goto`
 

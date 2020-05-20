@@ -2,7 +2,6 @@
 
 const JSON_Presenter = (container, script) => {
 
-    let speed = `normal`;
     let mode = `manual`;
     let clicked = false;
 
@@ -56,7 +55,7 @@ const JSON_Presenter = (container, script) => {
     const pause = step => {
         setTimeout(() => {
             step.next();
-        }, speed === `normal` ? step.duration * 1000 : 0);
+        }, script.speed === `normal` ? step.duration * 1000 : 0);
     };
 
     const release = step => {
@@ -105,7 +104,7 @@ const JSON_Presenter = (container, script) => {
             } else {
                 setTimeout(() => {
                     step.next();
-                }, speed === `normal` ? step.duration * 1000 : 0);
+                }, script.speed === `normal` ? step.duration * 1000 : 0);
             }
         }
     };
@@ -148,6 +147,9 @@ const JSON_Presenter = (container, script) => {
         text.style[`text-align`] = properties.textAlign;
         inner.appendChild(text);
         inner.text = text;
+        if (script.speed === `scan`) {
+            element.style.opacity = 0;
+        }
     };
 
     // Create an image block.
@@ -171,6 +173,9 @@ const JSON_Presenter = (container, script) => {
         element.style[`border`] = properties.blockBorder;
         element.style[`border-radius`] = properties.blockBorderRadius;
         container.appendChild(element);
+        if (script.speed === `scan`) {
+            element.style.opacity = 0;
+        }
     };
 
     // Set the content of a block
@@ -216,15 +221,19 @@ const JSON_Presenter = (container, script) => {
 
     // Show or hide a block
     const doShowHide = (step, showHide) => {
-        if (Array.isArray(step.blocks)) {
-            for (const block of step.blocks)
-            {
-                script.blocks[block].element.style[`opacity`] = showHide ? `1.0` : `0.0`;
+        if (script.speed !== `scan`) {
+            if (Array.isArray(step.blocks)) {
+                for (const name of step.blocks)
+                {
+                    script.blocks[name].opacity = showHide ? `1.0` : `0.0`;
+                    script.blocks[name].element.style[`opacity`] = script.blocks[name].opacity;
+                }
+            } else {
+                script.blocks[step.blocks].opacity = showHide ? `1.0` : `0.0`;
+                script.blocks[step.blocks].element.style[`opacity`] = script.blocks[step.blocks].opacity;
             }
-        } else {
-            script.blocks[step.blocks].element.style[`opacity`] = showHide ? `1.0` : `0.0`;
         }
-        doStep();
+        step.next();
     };
 
     const show = step => {
@@ -237,38 +246,60 @@ const JSON_Presenter = (container, script) => {
 
     // Fade up or down
     const doFade = (step, upDown) => {
-        const animSteps = Math.round(step.duration * 25);
         const stepBlocks = step.blocks;
-        const continueFlag = step.continue;
-        let animStep = 0;
-        const interval = setInterval(() => {
-            if (animStep < animSteps) {
-                const ratio =  0.5 - Math.cos(Math.PI * animStep / animSteps) / 2;
-                if (Array.isArray(stepBlocks)) {
-                    let blocks = stepBlocks.length;
-                    for (const block of stepBlocks)
-                    {
-                        const element = script.blocks[block].element;
-                        element.style[`opacity`] = upDown ? ratio : 1.0 - ratio;
-                    }
-                } else {
-                    const block = script.blocks[stepBlocks];
-                    if (!block.element) {
-                        clearInterval(interval);
-                        throw Error(`I can't fade up a block with no content`);
-                    }
-                    block.element.style[`opacity`] = upDown ? ratio : 1.0 - ratio;
+        if (script.speed === `scan`) {
+            if (Array.isArray(stepBlocks)) {
+                for (const block of stepBlocks)
+                {
+                    script.blocks[block].opacity = upDown ? 1.0 : 0.0;
+                    script.blocks[block].element.style.opacity = 0;
                 }
-                animStep++;
             } else {
-                clearInterval(interval);
-                if (!continueFlag) {
-                    step.next();
-                }
+                script.blocks[stepBlocks].opacity = upDown ? 1.0 : 0.0;
+                script.blocks[stepBlocks].element.style.opacity = 0;
             }
-        }, speed === `normal` ? 40 : 0);
-        if (continueFlag) {
             step.next();
+        } else {
+            const animSteps = Math.round(step.duration * 25);
+            const continueFlag = step.continue;
+            let animStep = 0;
+            const interval = setInterval(() => {
+                if (animStep < animSteps) {
+                    const ratio =  0.5 - Math.cos(Math.PI * animStep / animSteps) / 2;
+                    if (Array.isArray(stepBlocks)) {
+                        let blocks = stepBlocks.length;
+                        for (const block of stepBlocks)
+                        {
+                            const element = script.blocks[block].element;
+                            element.style[`opacity`] = upDown ? ratio : 1.0 - ratio;
+                        }
+                    } else {
+                        const block = script.blocks[stepBlocks];
+                        if (!block.element) {
+                            clearInterval(interval);
+                            throw Error(`I can't fade up a block with no content`);
+                        }
+                        block.element.style[`opacity`] = upDown ? ratio : 1.0 - ratio;
+                    }
+                    animStep++;
+                } else {
+                    clearInterval(interval);
+                    if (Array.isArray(stepBlocks)) {
+                        for (const block of stepBlocks)
+                        {
+                            script.blocks[block].opacity = upDown ? 1.0 : 0.0;
+                        }
+                    } else {
+                        script.blocks[stepBlocks].opacity = upDown ? 1.0 : 0.0;
+                    }
+                    if (!continueFlag) {
+                        step.next();
+                    }
+                }
+            }, 40);
+            if (continueFlag) {
+                step.next();
+            }
         }
     };
 
@@ -282,93 +313,110 @@ const JSON_Presenter = (container, script) => {
 
     // Handle a crossfade
     const crossfade = step => {
-        const block = script.blocks[step.block];
         const content = script.content[step.target];
-        const continueFlag = step.continue;
-        let element;
-        let newText;
-        switch (content.type) {
-            case `text`:
-                element = document.createElement(`div`);
-                element.style[`position`] = `absolute`;
-                element.style[`opacity`] = `0.0`;
-                element.style[`left`] = block.element.style[`left`];
-                element.style[`top`] = block.element.style[`top`];
-                element.style[`width`] = block.element.style[`width`];
-                element.style[`height`] = block.element.style[`height`];
-                element.style[`background`] = block.element.style[`background`]
-                element.style[`border`] = block.element.style[`border`]
-                element.style[`border-radius`] = block.element.style[`border-radius`]
-                block.container.appendChild(element);
-                const inner = document.createElement(`div`);
-                inner.style[`position`] = `absolute`;
-                inner.style[`left`] = block.element.inner.style[`left`];
-                inner.style[`top`] = block.element.inner.style[`top`];
-                inner.style[`width`] = block.element.inner.style[`width`];
-                element.appendChild(inner);
-                const text = document.createElement(`div`);
-                text.style[`font-family`] = block.element.inner.text.style[`font-family`];
-                text.style[`font-size`] = block.element.inner.text.style[`font-size`];
-                text.style[`font-weight`] = block.element.inner.text.style[`font-weight`];
-                text.style[`font-style`] = block.element.inner.text.style[`font-style`];
-                text.style[`color`] = block.element.inner.text.style[`color`];
-                text.style[`text-align`] = block.element.inner.text.style[`text-align`];
-                inner.appendChild(text);
-                newText = content.content;
-                if (Array.isArray(newText)) {
-                    newText = newText.join(`<br><br>`);
-                }
-                newText = newText.split(`\n`).join(`<br>`);
-                text.innerHTML = newText;
-                break;
-            case `image`:
-                element = document.createElement(`div`);
-                element.style[`position`] = `absolute`;
-                element.style[`opacity`] = `0.0`;
-                element.style[`left`] = block.element.style[`left`];
-                element.style[`top`] = block.element.style[`top`];
-                element.style[`width`] = block.element.style[`width`];
-                element.style[`height`] = block.element.style[`height`];
-                element.style[`background`] = block.element.style[`background`];
-                element.style[`border`] = block.element.style[`border`];
-                element.style[`border-radius`] = block.element.style[`border-radius`];
-                block.container.appendChild(element);
-                element.style[`background`] = `url("${content.url}")`;
-                element.style[`background-size`] = `cover`;
-                break;
-            default:
-                throw Error(`Unknown content type: '${content.type}'`);
-        }
-
-        const animSteps = Math.round(step.duration * 25);
-        let animStep = 0;
-        const interval = setInterval(() => {
-            if (animStep < animSteps) {
-                const ratio =  0.5 - Math.cos(Math.PI * animStep / animSteps) / 2;
-                block.element.style[`opacity`] = 1.0 - ratio;
-                element.style[`opacity`] = ratio;
-                animStep++;
-            } else {
-                clearInterval(interval);
-                switch (content.type) {
-                    case `text`:
-                        block.element.inner.text.innerHTML = newText;
-                        break;
-                    case `image`:
-                        block.element.style[`background`] = `url("${content.url}")`;
-                        block.element.style[`background-size`] = `cover`;
-                        break;
-                }
-                block.element.style[`opacity`] = 1.0 ;
-                element.parentNode.removeChild(element);
-                if (!continueFlag) {
-                    step.next();
-                }
+        const block = script.blocks[step.block];
+        if (script.speed === `scan`) {
+            switch (content.type) {
+                case `text`:
+                    newText = content.content;
+                    if (Array.isArray(newText)) {
+                        newText = newText.join(`<br><br>`);
+                    }
+                    newText = newText.split(`\n`).join(`<br>`);
+                    block.element.inner.text.innerHTML = newText;
+                    break;
+                case `image`:
+                    block.element.style[`background`] = `url("${content.url}")`;
+                    break;
             }
-            }, speed === `normal` ? 80 : 0);
+            step.next();
+        } else {
+            const continueFlag = step.continue;
+            let element;
+            let newText;
+            switch (content.type) {
+                case `text`:
+                    element = document.createElement(`div`);
+                    element.style[`position`] = `absolute`;
+                    element.style[`opacity`] = `0.0`;
+                    element.style[`left`] = block.element.style[`left`];
+                    element.style[`top`] = block.element.style[`top`];
+                    element.style[`width`] = block.element.style[`width`];
+                    element.style[`height`] = block.element.style[`height`];
+                    element.style[`background`] = block.element.style[`background`]
+                    element.style[`border`] = block.element.style[`border`]
+                    element.style[`border-radius`] = block.element.style[`border-radius`]
+                    container.appendChild(element);
+                    const inner = document.createElement(`div`);
+                    inner.style[`position`] = `absolute`;
+                    inner.style[`left`] = block.element.inner.style[`left`];
+                    inner.style[`top`] = block.element.inner.style[`top`];
+                    inner.style[`width`] = block.element.inner.style[`width`];
+                    element.appendChild(inner);
+                    const text = document.createElement(`div`);
+                    text.style[`font-family`] = block.element.inner.text.style[`font-family`];
+                    text.style[`font-size`] = block.element.inner.text.style[`font-size`];
+                    text.style[`font-weight`] = block.element.inner.text.style[`font-weight`];
+                    text.style[`font-style`] = block.element.inner.text.style[`font-style`];
+                    text.style[`color`] = block.element.inner.text.style[`color`];
+                    text.style[`text-align`] = block.element.inner.text.style[`text-align`];
+                    inner.appendChild(text);
+                    newText = content.content;
+                    if (Array.isArray(newText)) {
+                        newText = newText.join(`<br><br>`);
+                    }
+                    newText = newText.split(`\n`).join(`<br>`);
+                    text.innerHTML = newText;
+                    break;
+                case `image`:
+                    element = document.createElement(`div`);
+                    element.style[`position`] = `absolute`;
+                    element.style[`opacity`] = `0.0`;
+                    element.style[`left`] = block.element.style[`left`];
+                    element.style[`top`] = block.element.style[`top`];
+                    element.style[`width`] = block.element.style[`width`];
+                    element.style[`height`] = block.element.style[`height`];
+                    element.style[`background`] = block.element.style[`background`];
+                    element.style[`border`] = block.element.style[`border`];
+                    element.style[`border-radius`] = block.element.style[`border-radius`];
+                    container.appendChild(element);
+                    element.style[`background`] = `url("${content.url}")`;
+                    element.style[`background-size`] = `cover`;
+                    break;
+                default:
+                    throw Error(`Unknown content type: '${content.type}'`);
+            }
+
+            const animSteps = Math.round(step.duration * 25);
+            let animStep = 0;
+            const interval = setInterval(() => {
+                if (animStep < animSteps) {
+                    const ratio =  0.5 - Math.cos(Math.PI * animStep / animSteps) / 2;
+                    block.element.style[`opacity`] = 1.0 - ratio;
+                    element.style[`opacity`] = ratio;
+                    animStep++;
+                } else {
+                    clearInterval(interval);
+                    switch (content.type) {
+                        case `text`:
+                            block.element.inner.text.innerHTML = newText;
+                            break;
+                        case `image`:
+                            block.element.style[`background`] = `url("${content.url}")`;
+                            block.element.style[`background-size`] = `cover`;
+                            break;
+                    }
+                    block.element.style[`opacity`] = 1.0 ;
+                    container.removeChild(element);
+                    if (!continueFlag) {
+                        step.next();
+                    }
+                }
+            }, 40);
             if (continueFlag) {
                 step.next();
             }
+        }
     };
 
     // Compute a block size
@@ -451,77 +499,86 @@ const JSON_Presenter = (container, script) => {
 
     // Handle a transition
     const transition = step => {
-        const animSteps = Math.round(step.duration * 25);
-        let animStep = 0;
-        const stepType = step.type;
-        const continueFlag = step.continue;
         const block = script.blocks[step.block];
+        const stepType = step.type;
         const target = script.blocks[step.target];
-        const interval = setInterval(() => {
-            if (animStep < animSteps) {
-                const ratio =  0.5 - Math.cos(Math.PI * animStep / animSteps) / 2;
-                if (Array.isArray(stepType)) {
-                    for (const type of stepType) {
+        if (script.speed === `scan`) {
+            if (Array.isArray(stepType)) {
+                for (const type of stepType) {
+                    doTransitionStep(type, block, target, 1.0);
+                }
+            } else {
+                doTransitionStep(type, block, target, 1.0);
+            }
+            step.next();
+        } else {
+            const animSteps = Math.round(step.duration * 25);
+            let animStep = 0;
+            const continueFlag = step.continue;
+            const interval = setInterval(() => {
+                if (animStep < animSteps) {
+                    const ratio =  0.5 - Math.cos(Math.PI * animStep / animSteps) / 2;
+                    if (Array.isArray(stepType)) {
+                        for (const type of stepType) {
+                            doTransitionStep(type, block, target, ratio);
+                        }
+                    } else {
                         doTransitionStep(type, block, target, ratio);
                     }
+                    animStep++;
                 } else {
-                    doTransitionStep(type, block, target, ratio);
+                    clearInterval(interval);
+                    if (!continueFlag) {
+                        step.next();
+                    }
                 }
-                animStep++;
-            } else {
-                clearInterval(interval);
-                if (!continueFlag) {
+                }, 40);
+                if (continueFlag) {
                     step.next();
-                }
             }
-            }, speed === `normal` ? 40 : 0);
-            if (continueFlag) {
-            step.next();
         }
     };
 
-    const reset = step => {
-
-        const defaults = script.defaults;
-        for (const block of Object.values(script.blocks)) {
+    // Scan the script
+    const scan = () => {
+        script.speed = `scan`;
+        for (const name in script.blocks) {
+            const block = script.blocks[name];
             if (block.element) {
-                block.element.parentNode.removeChild(block.element);
+                container.removeChild(block.element);
                 block.element = null;
             }
-            const properties = {};
-            // Set up the default properties
-            for (const name in defaults) {
-                properties[name] = defaults[name];
-            }
-            // Override with local values
-            for (const name in block) {
-                properties[name] = block[name];
-            }
-            block.properties = properties;
-        };
-        step.next();
+        }
+        doStep(script.steps[0]);
     };
 
+    // Go to a specified label
     const goto = step => {
         const target = script.labels[step.target];
         if (typeof target !== `undefined`) {
-        doStep(script.steps[target]);
+            script.scanTarget = target;
+            scan();
         } else {
             throw Error(`Unknown label '${step.target}`);
         }
     };
 
+    // Load a plugin action
     const load = step => {
-		const element = document.createElement(`script`);
-		element.src = step.url;
-		element.onload = () => {
-            console.log(`Library ${element.src} loaded`);
+        if (script.speed === `scan`) {
             step.next();
-        };
-        element.onerror = () => {
-            throw Error(`Can't load plugin ${step.url}`);
-		};
-		document.head.appendChild(element);
+        } else {
+            const element = document.createElement(`script`);
+            element.src = step.url;
+            element.onload = () => {
+                console.log(`Plugin ${element.src} loaded`);
+                step.next();
+            };
+            element.onerror = () => {
+                throw Error(`Can't load plugin ${step.url}`);
+            };
+            document.head.appendChild(element);
+        }
     };
 
     const actions = {
@@ -534,24 +591,28 @@ const JSON_Presenter = (container, script) => {
         fadedown,
         crossfade,
         transition,
-        reset,
         goto,
         load
     };
 
     // Process a single step
     const doStep = step => {
-        while (!step.action) {
-            if (step.speed) {
-                speed = step.speed;
+        if (script.speed === `scan`) {
+            if (step.index === script.scanTarget) {
+                script.speed = `normal`;
+                for (const name in script.blocks) {
+                    const block = script.blocks[name];
+                    if (block.element) {
+                        block.element.style.opacity = block.opacity;
+                    }
+                }
             }
-            else throw Error(`Unknown syntax: '${JSON.stringify(step, 0, 2)}'`);
-            step = script.steps[stepno++];
-        }
-        if (step.comment) {
-            console.log(`Step ${step.index}: ${step.comment}`);
         } else {
-            console.log(`Step ${step.index}: ${step.action}`);
+            if (step.comment) {
+                console.log(`Step ${step.index}: ${step.comment}`);
+            } else {
+                console.log(`Step ${step.index}: ${step.action}`);
+            }
         }
         const actionName = step.action.split(` `).join(``);
         let handler = actions[actionName];
@@ -587,6 +648,7 @@ const JSON_Presenter = (container, script) => {
                 container.style[property] = script.container[property];
             }
         }
+        script.speed = `normal`;
         script.labels = {};
         for (const [index, step] of script.steps.entries()) {
             step.index = index;
@@ -596,7 +658,10 @@ const JSON_Presenter = (container, script) => {
             }
             if (index < script.steps.length - 1) {
                 step.next = () => {
-                    doStep(script.steps[index + 1]);
+                    const next = step.index + 1;
+                    setTimeout(() => {
+                        doStep(script.steps[next]);
+                    }, 0);
                 }
             }
             else {
@@ -610,7 +675,7 @@ const JSON_Presenter = (container, script) => {
         initBlocks();
         preloadImages();
         doStep(script.steps[0]);
-    }
+    };
 
     // Wait for a click/tap or a keypress to start
     document.addEventListener(`click`, init);
