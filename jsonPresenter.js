@@ -122,15 +122,39 @@ const JSON_Presenter = (container, script) => {
         block.element = element;
         element.style[`position`] = `absolute`;
         element.style[`opacity`] = `0.0`;
-        element.style[`left`] = properties.blockLeft * w;
-        element.style[`top`] = properties.blockTop * h;
-        element.style[`width`] = `${properties.blockWidth * w}px`;
-        element.style[`height`] = `${properties.blockHeight * h}px`;
+        let val = properties.blockLeft;
+        if (!isNaN(val)) {
+            val *= w;
+        }
+        element.style[`left`] = val;
+        val = properties.blockTop;
+        if (!isNaN(val)) {
+            val *= h;
+        }
+        element.style[`top`] = val;
+        val = properties.blockWidth;
+        if (!isNaN(val)) {
+            val *= w;
+        }
+        element.style[`width`] = `${val}px`;
+        val = properties.blockHeight;
+        if (!isNaN(val)) {
+            val *= h;
+        }
+        element.style[`height`] = `${val}px`;
         element.style[`background`] = properties.blockBackground;
         element.style[`border`] = properties.blockBorder;
         container.appendChild(element);
-        const marginLeft = properties.textMarginLeft * w;
-        const marginTop = properties.textMarginTop * h;
+        val = properties.textMarginLeft;
+        if (!isNaN(val)) {
+            val *= w;
+        }
+        const marginLeft = val;
+        val = properties.textMarginTop;
+        if (!isNaN(val)) {
+            val *= h;
+        }
+        const marginTop = val;
         const inner = document.createElement(`div`);
         inner.style[`position`] = `absolute`;
         inner.style[`left`] = marginLeft;
@@ -140,7 +164,11 @@ const JSON_Presenter = (container, script) => {
         element.inner = inner;
         const text = document.createElement(`div`);
         text.style[`font-family`] = properties.fontFamily;
-        text.style[`font-size`] = `${properties.fontSize * h}px`;
+        val = properties.fontSize;
+        if (!isNaN(val)) {
+            val *= h;
+        }
+        text.style[`font-size`] = `${val}px`;
         text.style[`font-weight`] = properties.fontWeight;
         text.style[`font-style`] = properties.fontStyle;
         text.style[`color`] = properties.fontColor;
@@ -165,10 +193,27 @@ const JSON_Presenter = (container, script) => {
         block.element = element;
         element.style[`position`] = `absolute`;
         element.style[`opacity`] = `0.0`;
-        element.style[`left`] = properties.blockLeft * w;
-        element.style[`top`] = properties.blockTop * h;
-        element.style[`width`] = `${properties.blockWidth * w}px`;
-        element.style[`height`] = `${properties.blockHeight * h}px`;
+        let val = properties.blockLeft;
+        if (!isNaN(val)) {
+            val *= w;
+        }
+        element.style[`left`] = val;
+        val = properties.blockTop;
+        if (!isNaN(val)) {
+            val *= h;
+        }
+        element.style[`top`] = val;
+        element.style[`top`] = val;
+        val = properties.blockWidth;
+        if (!isNaN(val)) {
+            val *= w;
+        }
+        element.style[`width`] = `${val}px`;
+        val = properties.blockHeight;
+        if (!isNaN(val)) {
+            val *= h;
+        }
+        element.style[`height`] = `${val}px`;
         element.style[`background`] = properties.blockBackground;
         element.style[`border`] = properties.blockBorder;
         element.style[`border-radius`] = properties.blockBorderRadius;
@@ -422,12 +467,24 @@ const JSON_Presenter = (container, script) => {
     // Compute a block size
     const setComputedBlockSize = (block, target, ratio) => {
         const boundingRect = block.container.getBoundingClientRect();
-        w = Math.round(boundingRect.width);
-        h = Math.round(boundingRect.height);
-        const width = block.properties.blockWidth * w / 1000;
-        const height = block.properties.blockHeight * h / 1000;
-        const endWidth = target.properties.blockWidth * w / 1000;
-        const endHeight = target.properties.blockHeight * h / 1000;
+        w = boundingRect.width / 1000;
+        h = boundingRect.height / 1000;
+        let width = block.properties.blockWidth;
+        if (!isNaN(width)) {
+            width *= w;
+        }
+        let height = block.properties.blockWidth;
+        if (!isNaN(height)) {
+            height *= h;
+        }
+        let endWidth = target.properties.blockWidth;
+        if (!isNaN(endWidth)) {
+            endWidth *= w;
+        }
+        let endHeight = target.properties.blockHeight;
+        if (!isNaN(endHeight)) {
+            endHeight *= h;
+        }
         block.element.style[`width`] = 
             `${width + (endWidth - width) * ratio}px`;
         block.element.style[`height`] = 
@@ -437,12 +494,24 @@ const JSON_Presenter = (container, script) => {
     // Compute a block position
     const setComputedBlockPosition = (block, target, ratio) => {
         const boundingRect = block.container.getBoundingClientRect();
-        w = Math.round(boundingRect.width);
-        h = Math.round(boundingRect.height);
-        const left = block.properties.blockLeft * w / 1000;
-        const top = block.properties.blockTop * h / 1000;
-        const endLeft = target.properties.blockLeft * w / 1000;
-        const endTop = target.properties.blockTop * h / 1000;
+        w = boundingRect.width / 1000;
+        h = boundingRect.height / 1000;
+        let left = block.properties.blockLeft;
+        if (!isNaN(left)) {
+            left *= w;
+        }
+        let top = block.properties.blockTop;
+        if (!isNaN(top)) {
+            top *= h;
+        }
+        let endLeft = target.properties.blockLeft;
+        if (!isNaN(endLeft)) {
+            endLeft *= w;
+        }
+        let endTop = target.properties.blockTop;
+        if (!isNaN(endTop)) {
+            endTop *= h;
+        }
         block.element.style[`left`] = 
             left + (endLeft - left) * ratio;
         block.element.style[`top`] = 
@@ -451,9 +520,15 @@ const JSON_Presenter = (container, script) => {
 
     // Compute a font size
     const setComputedFontSize = (block, target, ratio) => {
-        h = Math.round(block.container.getBoundingClientRect().height);
-        const size = block.properties.fontSize * h / 1000;
-        const endSize = target.properties.fontSize * h / 1000;
+        h = Math.round(block.container.getBoundingClientRect().height) / 1000;
+        let size = block.properties.fontSize;
+        if (!isNaN()) {
+            size *= h;
+        }
+        let endSize = target.properties.fontSize;
+        if (!isNaN()) {
+            endSize *= h;
+        }
         block.element.inner.text.style[`font-size`] = 
             `${size + Math.round((endSize - size) * ratio)}px`;
     };
