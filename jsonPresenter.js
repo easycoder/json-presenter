@@ -224,8 +224,8 @@ const JSON_Presenter = (container, script) => {
         } else {
             script.blocks[step.blocks].element.style[`opacity`] = showHide ? `1.0` : `0.0`;
         }
-        doStep();
-    };
+        step.next();
+};
 
     const show = step => {
         doShowHide(step, true);
@@ -476,7 +476,7 @@ const JSON_Presenter = (container, script) => {
             }
             }, speed === `normal` ? 40 : 0);
             if (continueFlag) {
-            step.next();
+                step.next();
         }
     };
 
@@ -596,7 +596,9 @@ const JSON_Presenter = (container, script) => {
             }
             if (index < script.steps.length - 1) {
                 step.next = () => {
-                    doStep(script.steps[index + 1]);
+                    setTimeout(() => {
+                        doStep(script.steps[index + 1]);
+                    }, 0);
                 }
             }
             else {
