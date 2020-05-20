@@ -307,7 +307,17 @@ The target of the `goto` must have a `label` property with a unique value, as in
 
 ### `load`
 
-Load a plugin extension to JSON::Presenter. This is a JavaScript file with a fixed format, as in this example, which fades a block down then back up again in the space of one second:
+Load a plugin extension to JSON::Presenter. This is a JavaScript file with a fixed format:
+```javascript
+const JSON_Presenter_Test = step => {
+    ...
+};
+
+JSON_Presenter.plugins.test = JSON_Presenter_Test;
+```
+The name of this action will be `test`. The name of the plugin is recommended to start with `JSON_Presenter` to avoid namespace clashes. The plugin runs when it is loaded and installs itself into the `plugins` property of the main program. It will then be available as an action under the name given. To supply it with options, add these as properties of the `step`. 
+
+This example fades a block down then back up again in the space of one second:
 ```javascript
 const JSON_Presenter_Test = step => {
     const animSteps = Math.round(step.duration * 25);
@@ -338,7 +348,9 @@ const JSON_Presenter_Test = step => {
 
 JSON_Presenter.plugins.test = JSON_Presenter_Test;
 ```
-The plugin takes a single `step` argument; this provides access to everything else inside the JSON::Presenter environment. The name of the plugin is recommended to start with `JSON_Presenter` to avoid namespace clashes. The plugin runs when it is loaded and installs itself into the `plugins` property of the main program. It will then be available as an action under the name given, in this case `test`. To supply it with options, add them as properties of the `step`. Here the value `duration` is passed in. The step in your presentation script will look like this:
+The plugin takes a single `step` argument; this provides access to everything else inside the JSON::Presenter environment. Here the value `duration` will bbe assumed as a property of `step`.
+
+The step in your presentation script will look like this:
 ```json
 {
     "comment": "--------------------------------- Run the test plugin",
