@@ -37,7 +37,7 @@ The simplest is to start with the demo script here and adapt it to your needs. A
 
  These relate to the container. There are currently only 2 values:
 
-  - `border` is the CSS style tht defines the border of the container
+  - `border` is the CSS style that defines the border of the container
   - `background` defines the background style to apply to the container
 
 If you prefer to use separate CSS classes to style your container, leave this section empty.
@@ -71,7 +71,7 @@ For example, if a block is to be given a left position that's one-fifth (20%) of
 
 This applies to the height of text, too. Although for most of the rest, mils are the same as fractional percentages, if you were to use a percentage for text it would relate the height to the current font size, which would not be the same thing at all.
 
-TODO: Allow the user to give values in px, pt or em. Mils will be assumed only if no suffix is given.
+If you wish you can use CSS units like `px`, `pt`, `em` or `%` where appropriate, though you are likely to have trouble applying transitions.
 
 ### Blocks
 
