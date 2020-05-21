@@ -708,11 +708,12 @@ const JSON_Presenter = (container, script) => {
             document.addEventListener(`click`, onClick);
         }
         document.onkeydown = null;
-        if (script.title) {
-            document.title = script.title;
+        if (script.global.title) {
+            document.title = script.global.title;
         }
         script.container.element = container;
-        const height = Math.round(parseFloat(container.offsetWidth) * script.aspectH / script.aspectW);
+        const height = Math.round(parseFloat(container.offsetWidth)
+            * script.global.aspectH / script.global.aspectW);
         container.style.height = `${Math.round(height)}px`;
         container.style.position = `relative`;
         container.style.overflow = `hidden`;

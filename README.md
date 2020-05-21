@@ -12,15 +12,9 @@ For an overview of the project see [this article on dev.to](https://dev.to/gtany
 
 ## How to build a presentation script
 
-The simplest is to start with the demo script here and adapt it to your needs. A script starts with 4 global properties:
+The simplest is to start with the demo script here and adapt it to your needs. A script has 6 groups of properties:
 
- - `title`
- - `description`
- - `aspectW`
- - `aspectH`
-
- and 5 groups of properties:
-
+ - Global
  - Container
  - Defaults
  - Blocks

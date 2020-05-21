@@ -1,8 +1,10 @@
 {
-    "title": "JSON::Presenter",
-    "description": "A demo presentation that outlines some features of JSON::Presenter",
-    "aspectW": 160,
-    "aspectH": 89,
+    "global": {
+        "title": "JSON::Presenter",
+        "description": "A demo presentation that outlines some features of JSON::Presenter",
+        "aspectW": 160,
+        "aspectH": 89
+    },
     "container": {
         "border": "1px solid black",
         "background": "black"
