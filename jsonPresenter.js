@@ -186,8 +186,8 @@ const JSON_Presenter = (container, script) => {
         if (block.element) {
             container.removeChild(block.element);
         }
-        w = container.getBoundingClientRect().width / 1000;
-        h = container.getBoundingClientRect().height / 1000;
+        const w = container.getBoundingClientRect().width / 1000;
+        const h = container.getBoundingClientRect().height / 1000;
         const properties = block.properties;
         const element = document.createElement(`div`);
         block.element = element;
@@ -467,8 +467,8 @@ const JSON_Presenter = (container, script) => {
     // Compute a block size
     const setComputedBlockSize = (block, target, ratio) => {
         const boundingRect = block.container.getBoundingClientRect();
-        w = boundingRect.width / 1000;
-        h = boundingRect.height / 1000;
+        const w = boundingRect.width / 1000;
+        const h = boundingRect.height / 1000;
         let width = block.properties.blockWidth;
         if (!isNaN(width)) {
             width *= w;
@@ -494,8 +494,8 @@ const JSON_Presenter = (container, script) => {
     // Compute a block position
     const setComputedBlockPosition = (block, target, ratio) => {
         const boundingRect = block.container.getBoundingClientRect();
-        w = boundingRect.width / 1000;
-        h = boundingRect.height / 1000;
+        const w = boundingRect.width / 1000;
+        const h = boundingRect.height / 1000;
         let left = block.properties.blockLeft;
         if (!isNaN(left)) {
             left *= w;
@@ -520,13 +520,13 @@ const JSON_Presenter = (container, script) => {
 
     // Compute a font size
     const setComputedFontSize = (block, target, ratio) => {
-        h = Math.round(block.container.getBoundingClientRect().height) / 1000;
+        const h = Math.round(block.container.getBoundingClientRect().height) / 1000;
         let size = block.properties.fontSize;
-        if (!isNaN()) {
+        if (!isNaN(size)) {
             size *= h;
         }
         let endSize = target.properties.fontSize;
-        if (!isNaN()) {
+        if (!isNaN(endSize)) {
             endSize *= h;
         }
         block.element.inner.text.style[`font-size`] = 
